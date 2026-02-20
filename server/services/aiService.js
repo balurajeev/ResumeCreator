@@ -4,17 +4,24 @@ require('dotenv').config();
 const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
 
 if (!apiKey) {
-    console.error('ERROR: No API Key found in environment variables!');
+    console.error('ERROR: No API Key found in environment variables! Please set GEMINI_API_KEY in Render/Vercel settings.');
 } else {
-    console.log(`AI Service initialized with key starting with: ${apiKey.substring(0, 7)}...`);
+    console.log(`AI Service initialized. Key starts with: ${apiKey.substring(0, 7)}...`);
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const rewriteResume = async (resumeText) => {
     try {
-        // Updated model list based on what is actually available for this specific API key
-        const modelNames = ["gemini-pro-latest", "gemini-flash-lite-latest", "gemini-pro"];
+        // Broad list of model names to handle different region/account availability
+        const modelNames = [
+            "gemini-1.5-flash",
+            "gemini-1.5-pro",
+            "gemini-pro-latest",
+            "gemini-pro",
+            "gemini-flash-lite-latest"
+        ];
+
         let model;
         let lastError;
 
@@ -55,14 +62,17 @@ const rewriteResume = async (resumeText) => {
             } catch (err) {
                 console.error(`Error with model ${name}:`, err.message);
                 lastError = err;
-                continue; // Try next model
+                // If it's an auth error or quota error, it might not be worth trying other models, 
+                // but let's try them all just in case.
+                continue;
             }
         }
 
         throw lastError;
     } catch (error) {
         console.error('Final Gemini Processing Error:', error);
-        throw new Error('AI processing failed. Please check your API key and model access.');
+        // Provide more detailed feedback in the thrown error so the UI/User can see it
+        throw new Error(`AI processing failed: ${error.message || 'Check API key/Model access'}`);
     }
 };
 
