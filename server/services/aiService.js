@@ -29,24 +29,43 @@ const rewriteResume = async (resumeText) => {
                 const model = genAI.getGenerativeModel({ model: name });
 
                 const prompt = `
-                    You are a professional resume writer. 
-                    Rewrite the following resume text to be more professional and ATS-optimized. 
-                    Use quantifiable achievements where possible. 
-                    YOU MUST RETURN ONLY A VALID JSON OBJECT. NO MARKDOWN, NO EXPLANATIONS.
+                    You are an expert ATS-optimized resume writer.
                     
-                    The JSON structure MUST follow this exactly:
+                    TASK:
+                    1. Read the provided "Raw Resume Text".
+                    2. Extract all personal info, work experience, education, and skills.
+                    3. Rewrite the content to be more professional, using strong action verbs and quantifiable results.
+                    4. IMPORTANT: Keep all factual information (dates, company names, job titles) EXACTLY as provided. Do not hallucinate.
+                    
+                    OUTPUT FORMAT:
+                    You MUST return ONLY a valid JSON object. Do not include any markdown styling like \`\`\`json or explanations.
+                    
+                    STRICT JSON STRUCTURE:
                     {
-                      "name": "string",
-                      "email": "string",
-                      "phone": "string",
-                      "linkedin": "string",
-                      "summary": "string",
-                      "experience": [{"role": "string", "company": "string", "duration": "string", "description": "string"}],
-                      "education": [{"degree": "string", "institution": "string", "year": "string"}],
-                      "skills": ["string"]
+                      "name": "Full Name",
+                      "email": "Email Address",
+                      "phone": "Phone Number",
+                      "linkedin": "LinkedIn URL (if found)",
+                      "summary": "A professional 2-3 sentence summary",
+                      "experience": [
+                        {
+                          "role": "Job Title",
+                          "company": "Company Name",
+                          "duration": "Dates (e.g. Jan 2020 - Present)",
+                          "description": "3-4 bullet points of achievements"
+                        }
+                      ],
+                      "education": [
+                        {
+                          "degree": "Degree Name",
+                          "institution": "School Name",
+                          "year": "Graduation Year"
+                        }
+                      ],
+                      "skills": ["Skill 1", "Skill 2"]
                     }
 
-                    Resume Details:
+                    Raw Resume Text:
                     ${resumeText}
                 `;
 

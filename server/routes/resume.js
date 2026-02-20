@@ -41,8 +41,8 @@ router.post('/upload', upload.single('resume'), async (req, res) => {
 
         res.json({ text: extractedText });
     } catch (error) {
-        console.error('Upload error:', error);
-        res.status(500).json({ error: 'Failed to process resume' });
+        console.error('SERVER UPLOAD ERROR:', error.message);
+        res.status(500).json({ error: `Failed to process resume: ${error.message}` });
     }
 });
 
