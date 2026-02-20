@@ -18,6 +18,7 @@ app.use('/uploads', express.static('uploads'));
 
 // Routes
 const resumeRoutes = require('./routes/resume');
+app.use('/resume', resumeRoutes);
 app.use('/api/resume', resumeRoutes);
 
 app.get('/', (req, res) => {
