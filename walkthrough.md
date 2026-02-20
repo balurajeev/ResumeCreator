@@ -15,6 +15,17 @@ The application features a minimalist, professional design with **11 dynamic the
 ### 2. Smart Resume Import
 Users can upload an existing PDF resume. The backend extracts the text and uses AI to structure it into a professional format automatically.
 
+## Latest Fixes (Local & Production)
+- **PDF Extraction Fix**: Resolved `TypeError` and empty text issues by updating `parserService.js` to handle `pdf-parse` v2.4.5 requirements (Uint8Array and `.getText().text`).
+- **Quota & Model Handling**: Implemented a robust fallback system for Gemini models. The app now prioritizes `gemini-pro-latest` and `gemini-flash-lite-latest` to avoid project-specific quota limits.
+- **Environment Stability**: Automatically ensures the `uploads/` directory exists and handles dynamic port selection (e.g., 50001-50004) for local development.
+
+## Verification Results
+- [x] **Local Upload**: Successfully parsed "balagopal_architect.pdf".
+- [x] **AI Rewrite**: Verified that Gemini preserves dates and facts while optimizing professional language.
+- [x] **Export**: Verified PDF and DOCX exports maintain styling.
+- [x] **Production**: Verified deployment on Render/Vercel handles routing and CORS correctly.
+
 ### 3. AI-Powered Rewrite
 A "Rewrite with AI" button allows users to send their current resume data to **Google Gemini**. The AI optimizes the language for ATS (Applicant Tracking Systems) and professional appeal.
 
