@@ -4,7 +4,7 @@ require('dotenv').config();
 const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
 
 if (!apiKey) {
-    console.error('ERROR: No API Key found in environment variables! Please set GEMINI_API_KEY in Render/Vercel settings.');
+    console.error('ERROR: No API Key found in environment variables!');
 } else {
     console.log(`AI Service initialized. Key starts with: ${apiKey.substring(0, 7)}...`);
 }
@@ -13,22 +13,20 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 const rewriteResume = async (resumeText) => {
     try {
-        // Broad list of model names to handle different region/account availability
+        // Models prioritized by what we saw in your successful CURL list
         const modelNames = [
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
             "gemini-pro-latest",
-            "gemini-pro",
-            "gemini-flash-lite-latest"
+            "gemini-flash-lite-latest",
+            "gemini-1.5-flash",
+            "gemini-1.5-pro"
         ];
 
-        let model;
         let lastError;
 
         for (const name of modelNames) {
             try {
                 console.log(`Attempting to use model: ${name}`);
-                model = genAI.getGenerativeModel({ model: name });
+                const model = genAI.getGenerativeModel({ model: name });
 
                 const prompt = `
                     You are a professional resume writer. 
@@ -56,14 +54,19 @@ const rewriteResume = async (resumeText) => {
                 const response = await result.response;
                 const text = response.text();
 
-                // Clean the response: Gemini sometimes wraps results in ```json ... ```
                 const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
                 return JSON.parse(cleanJson);
+
             } catch (err) {
                 console.error(`Error with model ${name}:`, err.message);
                 lastError = err;
-                // If it's an auth error or quota error, it might not be worth trying other models, 
-                // but let's try them all just in case.
+
+                // If it's a quota error (429 or limit exceeded), trying another model might help 
+                // but usually signifies a bigger issue with the API key or account status.
+                if (err.message.includes('Quota exceeded') || err.message.includes('429')) {
+                    console.warn(`Quota issue with ${name}. Moving to next...`);
+                }
+
                 continue;
             }
         }
@@ -71,8 +74,7 @@ const rewriteResume = async (resumeText) => {
         throw lastError;
     } catch (error) {
         console.error('Final Gemini Processing Error:', error);
-        // Provide more detailed feedback in the thrown error so the UI/User can see it
-        throw new Error(`AI processing failed: ${error.message || 'Check API key/Model access'}`);
+        throw new Error(`AI processing failed: ${error.message}`);
     }
 };
 
