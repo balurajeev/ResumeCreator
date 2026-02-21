@@ -147,18 +147,23 @@ const generatePDF = (resumeData, stream) => {
                 const roleHeight = doc.heightOfString(role, { fontSize: 11, width: roleWidthLimit, font: boldFont });
                 const companyHeight = 18;
                 const descHeight = doc.heightOfString(description, { fontSize: 10, width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
-                // Calculate how much space this item REALLY needs
-                const totalItemHeight = roleHeight + companyHeight + descHeight + 10;
+                // Calculate how much space this item REALLY needs (Header + bit of margin)
+                const headerHeight = roleHeight + companyHeight + 5;
+                const totalItemHeight = headerHeight + descHeight + 10;
 
-                // Only force page break if the item is truly too large for the remaining space
-                if (ly + totalItemHeight > pageHeight - 40) {
+                // Only break the page if there isn't even room for the role title alone
+                if (ly + roleHeight + 10 > pageHeight - 30) {
                     doc.addPage();
                     if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
                     ly = 50;
                 }
 
+                // Calculate where this item ends (for the timeline line)
+                // We cap the line at the page bottom if the item is huge
+                const lineEndY = Math.min(ly + totalItemHeight, pageHeight - 30);
+
                 // Vertical Line Segment (Continuous look)
-                doc.strokeColor(timelineColor).lineWidth(1).moveTo(timelineX, ly).lineTo(timelineX, ly + totalItemHeight).stroke();
+                doc.strokeColor(timelineColor).lineWidth(1).moveTo(timelineX, ly).lineTo(timelineX, lineEndY).stroke();
 
                 // Blue Circle Bullet (Centered vertically with first line of role)
                 doc.fillColor(primaryColor).circle(timelineX, ly + 6, 4).fill();
@@ -170,16 +175,16 @@ const generatePDF = (resumeData, stream) => {
                 // Role Text
                 doc.fillColor(isDark ? '#FFFFFF' : '#111827').font(boldFont).fontSize(11).text(role, expStartX, ly, { width: roleWidthLimit });
 
-                ly += roleHeight + 3;
+                ly += roleHeight + 2;
 
                 // Company
                 doc.fillColor(secondaryColor).font(boldFont).fontSize(10.5).text(company, expStartX, ly);
-                ly += 16;
+                ly += 14;
 
                 // Description
-                doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(description, expStartX, ly, { width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
+                doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(description, expStartX, ly, { width: itemLeftWidth, align: 'justify', lineGap: 1 });
 
-                ly += descHeight + 12;
+                ly += descHeight + 10;
             });
         }
 
