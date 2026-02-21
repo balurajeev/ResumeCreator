@@ -153,7 +153,7 @@ const generateDOCX = async (resumeData) => {
                                                 )),
                                                 new Paragraph({
                                                     children: [new TextRun({ text: "" })],
-                                                    spacing: { after: 100 },
+                                                    spacing: { after: 80 },
                                                     border: { left: (index < experience.length - 1) ? { color: timelineColor, space: 10, style: BorderStyle.SINGLE, size: 12 } : { style: BorderStyle.NONE } }
                                                 }),
                                             ]),

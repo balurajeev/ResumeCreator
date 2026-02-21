@@ -147,9 +147,11 @@ const generatePDF = (resumeData, stream) => {
                 const roleHeight = doc.heightOfString(role, { fontSize: 11, width: roleWidthLimit, font: boldFont });
                 const companyHeight = 18;
                 const descHeight = doc.heightOfString(description, { fontSize: 10, width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
-                const totalItemHeight = roleHeight + companyHeight + descHeight + 20;
+                // Calculate how much space this item REALLY needs
+                const totalItemHeight = roleHeight + companyHeight + descHeight + 10;
 
-                if (ly + totalItemHeight > pageHeight - 50) {
+                // Only force page break if the item is truly too large for the remaining space
+                if (ly + totalItemHeight > pageHeight - 40) {
                     doc.addPage();
                     if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
                     ly = 50;
@@ -165,19 +167,19 @@ const generatePDF = (resumeData, stream) => {
                 doc.fillColor(isDark ? '#1F2937' : '#F3F4F6').rect(margin + leftWidth - durWidth, ly - 2, durWidth, 14, 7).fill();
                 doc.fillColor(grayColor).font(font).fontSize(durTextSize).text(duration, margin + leftWidth - durWidth + 5, ly + 1.5);
 
-                // Role Text (Using calculated roleWidthLimit to prevent overlap)
+                // Role Text
                 doc.fillColor(isDark ? '#FFFFFF' : '#111827').font(boldFont).fontSize(11).text(role, expStartX, ly, { width: roleWidthLimit });
 
-                ly += roleHeight + 4;
+                ly += roleHeight + 3;
 
                 // Company
                 doc.fillColor(secondaryColor).font(boldFont).fontSize(10.5).text(company, expStartX, ly);
-                ly += companyHeight;
+                ly += 16;
 
                 // Description
                 doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(description, expStartX, ly, { width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
 
-                ly += descHeight + 18;
+                ly += descHeight + 12;
             });
         }
 

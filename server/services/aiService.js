@@ -13,23 +13,23 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 const rewriteResume = async (resumeText) => {
     try {
-        // Broad list of model identifiers to handle environment variations
+        // Exhaustive list based on your specific project's "list_models" output
         const modelNames = [
+            "gemini-flash-latest",
+            "gemini-pro-latest",
             "gemini-1.5-flash",
-            "gemini-1.5-flash-latest",
             "gemini-1.5-pro",
-            "gemini-1.5-pro-latest",
-            "gemini-2.0-flash-exp",
-            "gemini-pro",
-            "gemini-pro-latest"
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-lite",
+            "gemini-2.0-flash-exp"
         ];
 
         let lastError;
-        let isQuotaIssue = false;
+        let quotaExceededAny = false;
 
         for (const name of modelNames) {
             try {
-                console.log(`Attempting to use model: ${name}`);
+                console.log(`AI Service: Attempting model: ${name}`);
                 const model = genAI.getGenerativeModel({ model: name });
 
                 const prompt = `
@@ -73,48 +73,51 @@ const rewriteResume = async (resumeText) => {
                     ${resumeText}
                 `;
 
+                // Set a timeout for the request
                 const result = await model.generateContent(prompt);
                 const response = await result.response;
                 const text = response.text();
 
+                if (!text) throw new Error("Empty response from AI");
+
                 // Robust JSON extraction
                 let cleanJson = text.trim();
-                if (cleanJson.includes('```')) {
-                    cleanJson = cleanJson.replace(/```json/g, '').replace(/```/g, '').trim();
-                }
-
-                // Final check to ensure it starts with {
                 const startIdx = cleanJson.indexOf('{');
                 const endIdx = cleanJson.lastIndexOf('}');
+
                 if (startIdx !== -1 && endIdx !== -1) {
                     cleanJson = cleanJson.substring(startIdx, endIdx + 1);
+                } else {
+                    console.error("AI Output did not contain valid JSON block:", text);
+                    throw new Error("Invalid format from AI");
                 }
 
                 return JSON.parse(cleanJson);
 
             } catch (err) {
-                console.error(`Error with model ${name}:`, err.message);
+                console.error(`AI Service: Error with ${name}: ${err.message}`);
                 lastError = err;
 
                 if (err.message.includes('Quota exceeded') || err.message.includes('429')) {
-                    isQuotaIssue = true;
-                    console.warn(`Quota issue with ${name}. Moving to next...`);
+                    quotaExceededAny = true;
+                    console.warn(`AI Service: Quota limit reached for ${name}.`);
                 }
 
-                // If it's a 404, we just move on
+                // Move to next model
                 continue;
             }
         }
 
-        // If we reach here, all models failed
-        if (isQuotaIssue) {
-            throw new Error("AI Quota Exceeded. You have hit the daily limit for the Gemini Free Tier. Please try again tomorrow or use a different API Key.");
+        // Final error reporting
+        if (quotaExceededAny) {
+            throw new Error("AI Quota Exceeded. The daily free limit for this API key has been reached. Please try again in 24 hours or provide a different Google API Key in the .env file.");
+        } else {
+            throw new Error(`AI processing failed after trying all models. Last error: ${lastError?.message || 'Unknown error'}`);
         }
-        throw lastError;
 
     } catch (error) {
         console.error('Final Gemini Processing Error:', error);
-        throw new Error(`AI processing failed: ${error.message}`);
+        throw error;
     }
 };
 
