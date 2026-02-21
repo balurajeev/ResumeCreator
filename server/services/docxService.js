@@ -18,8 +18,8 @@ const generateDOCX = async (resumeData) => {
         const bgColor = isDark ? '111827' : 'FFFFFF';
         const textColor = isDark ? 'FFFFFF' : '333333';
         const grayText = isDark ? '9CA3AF' : '666666';
+        const timelineColor = isDark ? '374151' : 'E5E7EB';
 
-        // Safe extraction of arrays
         const experience = Array.isArray(resumeData.experience) ? resumeData.experience : [];
         const education = Array.isArray(resumeData.education) ? resumeData.education : [];
         const skills = Array.isArray(resumeData.skills) ? resumeData.skills : [];
@@ -114,16 +114,22 @@ const generateDOCX = async (resumeData) => {
                                                 }),
                                             ] : []),
 
-                                            // Experience
+                                            // Experience Header
                                             new Paragraph({
                                                 children: [new TextRun({ text: 'EXPERIENCE', bold: true, color: secondaryColor, size: 22 })],
                                                 border: { left: { color: primaryColor, space: 10, style: BorderStyle.SINGLE, size: 24 } },
                                                 spacing: { before: 300, after: 150 },
                                             }),
-                                            ...experience.flatMap(exp => [
+
+                                            // Experience Items with Timeline simulation
+                                            ...experience.flatMap((exp, index) => [
                                                 new Paragraph({
-                                                    children: [new TextRun({ text: String(exp.role || 'Role'), bold: true, size: 20, color: textColor })],
-                                                    spacing: { before: 150 },
+                                                    children: [
+                                                        new TextRun({ text: "●  ", color: primaryColor, size: 22 }),
+                                                        new TextRun({ text: String(exp.role || 'Role'), bold: true, size: 20, color: textColor })
+                                                    ],
+                                                    spacing: { before: 200 },
+                                                    border: { left: { color: timelineColor, space: 12, style: BorderStyle.SINGLE, size: 12 } },
                                                 }),
                                                 new Paragraph({
                                                     children: [
@@ -131,18 +137,22 @@ const generateDOCX = async (resumeData) => {
                                                         new TextRun({ text: `\t${String(exp.duration || '')}`, color: grayText, size: 16 }),
                                                     ],
                                                     tabStops: [{ type: 'right', position: 6500 }],
-                                                    spacing: { after: 100 },
+                                                    spacing: { after: 100, left: 240 },
+                                                    border: { left: { color: timelineColor, space: 12, style: BorderStyle.SINGLE, size: 12 } },
                                                 }),
-                                                // Robust description rendering
                                                 ...(String(exp.description || '')).split('\n').filter(l => l.trim()).map(line => (
                                                     new Paragraph({
                                                         children: [new TextRun({ text: line.trim() })],
-                                                        spacing: { after: 80 },
+                                                        spacing: { after: 80, left: 240 },
                                                         alignment: AlignmentType.JUSTIFY,
+                                                        border: { left: { color: timelineColor, space: 12, style: BorderStyle.SINGLE, size: 12 } },
                                                     })
                                                 )),
-                                                // Spacer
-                                                new Paragraph({ children: [new TextRun({ text: "" })], spacing: { after: 200 } }),
+                                                new Paragraph({
+                                                    children: [new TextRun({ text: "" })],
+                                                    spacing: { after: 200 },
+                                                    border: { left: (index < experience.length - 1) ? { color: timelineColor, space: 12, style: BorderStyle.SINGLE, size: 12 } : { style: BorderStyle.NONE } }
+                                                }),
                                             ]),
                                         ],
                                     }),
@@ -190,9 +200,7 @@ const generateDOCX = async (resumeData) => {
             }],
         });
 
-        console.log('DOCX Service: Generation complete, packing to buffer');
         const buffer = await Packer.toBuffer(doc);
-        console.log('DOCX Service: Buffer created, size:', buffer.length);
         return buffer;
     } catch (error) {
         console.error('DOCX Service: Error generating document:', error);

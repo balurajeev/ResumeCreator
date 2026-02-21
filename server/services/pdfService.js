@@ -12,6 +12,7 @@ const generatePDF = (resumeData, stream) => {
         const font = theme.font === 'serif' ? 'Times-Roman' : 'Helvetica';
         const boldFont = theme.font === 'serif' ? 'Times-Bold' : 'Helvetica-Bold';
         const grayColor = isDark ? '#9CA3AF' : '#666666';
+        const timelineColor = isDark ? '#374151' : '#E5E7EB';
 
         const doc = new PDFDocument({
             margin: 0,
@@ -71,7 +72,7 @@ const generatePDF = (resumeData, stream) => {
         y += 40;
         const contentStartY = y;
 
-        // Column Config (65/35 split like UI)
+        // Column Config
         const leftWidth = 310;
         const rightWidth = 160;
         const rightX = margin + leftWidth + 30;
@@ -127,31 +128,73 @@ const generatePDF = (resumeData, stream) => {
             doc.fillColor(isDark ? '#FFFFFF' : secondaryColor).font(boldFont).fontSize(13).text('EXPERIENCE', margin + 15, ly + 2);
             ly += 35;
 
-            resumeData.experience.forEach(exp => {
-                // Page break logic
+            const timelineX = margin + 2; // Center of the 4px vertical bar
+            const expStartX = margin + 25; // Indent content for timeline
+            const itemLeftWidth = leftWidth - 15;
+
+            // Pre-calculate heights for the connecting line
+            const experienceEntries = [];
+            let currentLy = ly;
+
+            resumeData.experience.forEach((exp, index) => {
+                if (currentLy > pageHeight - 120) {
+                    currentLy = 50;
+                }
+                const startY = currentLy;
+
+                // Estimate height
+                const roleHeight = Math.max(16, doc.heightOfString(String(exp.role || ''), { fontSize: 11, width: itemLeftWidth - 100 }));
+                const descHeight = doc.heightOfString(String(exp.description || ''), { width: itemLeftWidth, fontSize: 10, lineGap: 1.5 });
+                const totalHeight = 16 + 18 + descHeight + 28;
+
+                experienceEntries.push({ ...exp, y: startY, height: totalHeight });
+                currentLy += totalHeight;
+            });
+
+            // Draw Timeline Line
+            if (experienceEntries.length > 1) {
+                doc.strokeColor(timelineColor).lineWidth(1.5)
+                    .moveTo(timelineX, experienceEntries[0].y + 5)
+                    .lineTo(timelineX, experienceEntries[experienceEntries.length - 1].y + 5)
+                    .stroke();
+            }
+
+            resumeData.experience.forEach((exp, index) => {
                 if (ly > pageHeight - 120) {
                     doc.addPage();
                     if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
                     ly = 50;
+
+                    // Redraw line on new page if needed (simplified for repo version)
+                    doc.strokeColor(timelineColor).lineWidth(1.5)
+                        .moveTo(timelineX, ly)
+                        .lineTo(timelineX, pageHeight - 50)
+                        .stroke();
                 }
+
+                // Blue Circle Bullet
+                doc.fillColor(primaryColor).circle(timelineX, ly + 5, 4).fill();
 
                 // Role
                 const role = String(exp.role || '');
-                doc.fillColor(isDark ? '#FFFFFF' : '#111827').font(boldFont).fontSize(11).text(role, margin, ly, { width: leftWidth - 100 });
+                doc.fillColor(isDark ? '#FFFFFF' : '#111827').font(boldFont).fontSize(11).text(role, expStartX, ly, { width: itemLeftWidth - 100 });
 
-                // Duration (Right aligned in the left column)
-                doc.fillColor(grayColor).font(font).fontSize(9).text(String(exp.duration || ''), margin, ly + 2, { align: 'right', width: leftWidth });
+                // Duration Pill
+                const dur = String(exp.duration || '');
+                const durWidth = doc.widthOfString(dur, { fontSize: 8.5 }) + 10;
+                doc.fillColor(isDark ? '#1F2937' : '#F3F4F6').rect(margin + leftWidth - durWidth, ly - 2, durWidth, 14, 7).fill();
+                doc.fillColor(grayColor).font(font).fontSize(8.5).text(dur, margin + leftWidth - durWidth + 5, ly + 1);
 
-                ly += Math.max(16, doc.heightOfString(role, { fontSize: 11, width: leftWidth - 100 })) + 4;
+                ly += Math.max(16, doc.heightOfString(role, { fontSize: 11, width: itemLeftWidth - 100 })) + 4;
 
                 // Company
-                doc.fillColor(secondaryColor).font(boldFont).fontSize(10.5).text(String(exp.company || ''), margin, ly);
+                doc.fillColor(secondaryColor).font(boldFont).fontSize(10.5).text(String(exp.company || ''), expStartX, ly);
                 ly += 18;
 
                 // Description
                 const desc = String(exp.description || '');
-                doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(desc, margin, ly, { width: leftWidth, align: 'justify', lineGap: 1.5 });
-                ly += doc.heightOfString(desc, { width: leftWidth, fontSize: 10, lineGap: 1.5 }) + 28;
+                doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(desc, expStartX, ly, { width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
+                ly += doc.heightOfString(desc, { width: itemLeftWidth, fontSize: 10, lineGap: 1.5 }) + 28;
             });
         }
 

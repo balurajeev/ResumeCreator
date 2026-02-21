@@ -25,6 +25,7 @@
 - [x] Sync theme colors and fonts between UI and Export
 - [x] Resolve Experience Description data loss in Word
 - [x] Stabilize connection on Port 50003
+- [x] Implement Vertical Timeline in exports
 - [x] Provide final high-fidelity export services
 - [x] Sync Export Styles [x]
     - [x] Map Theme Colors to Hex codes in Backend [x]
