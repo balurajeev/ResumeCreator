@@ -174,17 +174,15 @@ const generatePDF = (resumeData, stream) => {
 
                 // Role Text
                 doc.fillColor(isDark ? '#FFFFFF' : '#111827').font(boldFont).fontSize(11).text(role, expStartX, ly, { width: roleWidthLimit });
-
-                ly += roleHeight + 2;
+                ly = doc.y + 2;
 
                 // Company
                 doc.fillColor(secondaryColor).font(boldFont).fontSize(10.5).text(company, expStartX, ly);
-                ly += 14;
+                ly = doc.y + 4;
 
-                // Description
+                // Description — use doc.y after so we know the REAL rendered end
                 doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(description, expStartX, ly, { width: itemLeftWidth, align: 'justify', lineGap: 1 });
-
-                ly += descHeight + 10;
+                ly = doc.y + 12;
             });
         }
 
