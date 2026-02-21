@@ -13,15 +13,19 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 const rewriteResume = async (resumeText) => {
     try {
-        // Models prioritized by what we saw in your successful CURL list
+        // Broad list of model identifiers to handle environment variations
         const modelNames = [
-            "gemini-pro-latest",
-            "gemini-flash-lite-latest",
             "gemini-1.5-flash",
-            "gemini-1.5-pro"
+            "gemini-1.5-flash-latest",
+            "gemini-1.5-pro",
+            "gemini-1.5-pro-latest",
+            "gemini-2.0-flash-exp",
+            "gemini-pro",
+            "gemini-pro-latest"
         ];
 
         let lastError;
+        let isQuotaIssue = false;
 
         for (const name of modelNames) {
             try {
@@ -73,24 +77,41 @@ const rewriteResume = async (resumeText) => {
                 const response = await result.response;
                 const text = response.text();
 
-                const cleanJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                // Robust JSON extraction
+                let cleanJson = text.trim();
+                if (cleanJson.includes('```')) {
+                    cleanJson = cleanJson.replace(/```json/g, '').replace(/```/g, '').trim();
+                }
+
+                // Final check to ensure it starts with {
+                const startIdx = cleanJson.indexOf('{');
+                const endIdx = cleanJson.lastIndexOf('}');
+                if (startIdx !== -1 && endIdx !== -1) {
+                    cleanJson = cleanJson.substring(startIdx, endIdx + 1);
+                }
+
                 return JSON.parse(cleanJson);
 
             } catch (err) {
                 console.error(`Error with model ${name}:`, err.message);
                 lastError = err;
 
-                // If it's a quota error (429 or limit exceeded), trying another model might help 
-                // but usually signifies a bigger issue with the API key or account status.
                 if (err.message.includes('Quota exceeded') || err.message.includes('429')) {
+                    isQuotaIssue = true;
                     console.warn(`Quota issue with ${name}. Moving to next...`);
                 }
 
+                // If it's a 404, we just move on
                 continue;
             }
         }
 
+        // If we reach here, all models failed
+        if (isQuotaIssue) {
+            throw new Error("AI Quota Exceeded. You have hit the daily limit for the Gemini Free Tier. Please try again tomorrow or use a different API Key.");
+        }
         throw lastError;
+
     } catch (error) {
         console.error('Final Gemini Processing Error:', error);
         throw new Error(`AI processing failed: ${error.message}`);
