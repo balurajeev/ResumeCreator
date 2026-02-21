@@ -12,7 +12,7 @@ const generatePDF = (resumeData, stream) => {
     const doc = new PDFDocument({
         margin: 0,
         size: 'A4',
-        bufferPages: true // Help with multi-page sidebar tracking
+        bufferPages: true
     });
 
     doc.pipe(stream);
@@ -34,7 +34,7 @@ const generatePDF = (resumeData, stream) => {
     // --- HEADER ---
     let currentY = 55;
 
-    // Name (Matching UI's bold large look)
+    // Name
     doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
         .font(boldFont)
         .fontSize(32)
@@ -46,7 +46,7 @@ const generatePDF = (resumeData, stream) => {
 
     currentY += 40;
 
-    // Contact Info (Phone/Email)
+    // Contact Info
     let contactInfo = `${resumeData.email || ''}   |   ${resumeData.phone || ''}`;
     doc.fillColor(isDark ? '#9CA3AF' : '#666666')
         .font(font)
@@ -55,7 +55,7 @@ const generatePDF = (resumeData, stream) => {
 
     currentY += 16;
 
-    // LinkedIn Link (Blue like UI)
+    // LinkedIn Link
     if (resumeData.linkedin) {
         doc.fillColor(isDark ? '#3B82F6' : '#0a66c2')
             .font(boldFont)
@@ -87,75 +87,8 @@ const generatePDF = (resumeData, stream) => {
     const rightColX = leftColX + leftColWidth + 35;
     const rightColWidth = (pageWidth - margin * 2) * 0.38 - 35;
 
-    // --- LEFT COLUMN (Summary & Experience) ---
-    let leftY = contentStartY;
-
-    // Summary
-    if (resumeData.summary) {
-        doc.fillColor(primaryColor).rect(leftColX, leftY, 4, 18).fill();
-        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
-            .font(boldFont)
-            .fontSize(13)
-            .text('PROFESSIONAL SUMMARY', leftColX + 15, leftY + 2, { characterSpacing: 1 });
-
-        leftY += 35;
-        doc.fillColor(isDark ? '#D1D5DB' : '#4B5563')
-            .font(font)
-            .fontSize(10.5)
-            .text(resumeData.summary, leftColX, leftY, { width: leftColWidth, align: 'justify', lineGap: 3 });
-
-        leftY += doc.heightOfString(resumeData.summary, { width: leftColWidth, fontSize: 10.5, lineGap: 3 }) + 40;
-    }
-
-    // Experience
-    if (resumeData.experience && resumeData.experience.length > 0) {
-        doc.fillColor(primaryColor).rect(leftColX, leftY, 4, 18).fill();
-        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
-            .font(boldFont)
-            .fontSize(13)
-            .text('EXPERIENCE', leftColX + 15, leftY + 2, { characterSpacing: 1 });
-
-        leftY += 35;
-
-        resumeData.experience.forEach((exp) => {
-            // Check for page break
-            if (leftY > pageHeight - 100) {
-                doc.addPage();
-                if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
-                leftY = 50;
-            }
-
-            // Role
-            doc.fillColor(isDark ? '#F9FAFB' : '#111827')
-                .font(boldFont)
-                .fontSize(11.5)
-                .text(exp.role, leftColX, leftY, { width: leftColWidth * 0.7 });
-
-            // Duration
-            const durationTxt = exp.duration || '';
-            doc.fillColor(isDark ? '#6B7280' : '#888888')
-                .font(font)
-                .fontSize(9)
-                .text(durationTxt, leftColX, leftY + 2, { align: 'right', width: leftColWidth });
-
-            leftY += Math.max(16, doc.heightOfString(exp.role, { fontSize: 11.5, width: leftColWidth * 0.7 })) + 2;
-
-            // Company
-            doc.fillColor(secondaryColor).font(boldFont).fontSize(10).text(exp.company, leftColX, leftY);
-            leftY += 15;
-
-            // Description
-            doc.fillColor(isDark ? '#9CA3AF' : '#444444').font(font).fontSize(10).text(exp.description, leftColX, leftY, {
-                width: leftColWidth,
-                lineGap: 2,
-                align: 'justify'
-            });
-            leftY += doc.heightOfString(exp.description, { width: leftColWidth, fontSize: 10, lineGap: 2 }) + 25;
-        });
-    }
-
-    // --- RIGHT COLUMN (Education & Skills) ---
-    // IMPORTANT: Reset to the fixed start position of the header divider
+    // --- RIGHT COLUMN (Sidebar) ---
+    // We write this FIRST to ensure it appears on the first page side-by-side with the Summary
     let rightY = contentStartY;
 
     // Education
@@ -170,24 +103,24 @@ const generatePDF = (resumeData, stream) => {
         resumeData.education.forEach(edu => {
             doc.fillColor(isDark ? '#F9FAFB' : '#111827')
                 .font(boldFont)
-                .fontSize(10.5)
+                .fontSize(10)
                 .text(edu.degree, rightColX, rightY, { width: rightColWidth });
 
-            rightY += doc.heightOfString(edu.degree, { fontSize: 10.5, width: rightColWidth }) + 4;
+            rightY += doc.heightOfString(edu.degree, { fontSize: 10, width: rightColWidth }) + 4;
 
             doc.fillColor(isDark ? '#9CA3AF' : '#666666')
                 .font(font)
-                .fontSize(9.5)
+                .fontSize(9)
                 .text(edu.institution, rightColX, rightY, { width: rightColWidth });
 
             rightY += 12;
 
             doc.fillColor(isDark ? '#4B5563' : '#9CA3AF')
                 .font(boldFont)
-                .fontSize(8.5)
-                .text(edu.year, rightColX, rightY);
+                .fontSize(8)
+                .text(edu.year || '', rightColX, rightY);
 
-            rightY += 28;
+            rightY += 25;
         });
     }
 
@@ -202,17 +135,82 @@ const generatePDF = (resumeData, stream) => {
         rightY += 30;
 
         resumeData.skills.forEach(skill => {
-            // Decorative background for skill
             doc.fillColor(isDark ? '#1F2937' : '#F9FAFB')
-                .rect(rightColX, rightY, rightColWidth, 18)
+                .rect(rightColX, rightY, rightColWidth, 16)
                 .fill();
 
             doc.fillColor(isDark ? '#D1D5DB' : '#4B5563')
                 .font(boldFont)
-                .fontSize(8.5)
-                .text(skill.toUpperCase(), rightColX + 8, rightY + 5, { width: rightColWidth - 16 });
+                .fontSize(8)
+                .text(skill.toUpperCase(), rightColX + 5, rightY + 4, { width: rightColWidth - 10 });
 
-            rightY += 23;
+            rightY += 20;
+        });
+    }
+
+    // --- LEFT COLUMN (Main Content) ---
+    // Now write the main content. If it overflows to Page 2, the sidebar stays on Page 1.
+    let leftY = contentStartY;
+
+    // Summary
+    if (resumeData.summary) {
+        doc.fillColor(primaryColor).rect(leftColX, leftY, 4, 18).fill();
+        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
+            .font(boldFont)
+            .fontSize(13)
+            .text('PROFESSIONAL SUMMARY', leftColX + 15, leftY + 2, { characterSpacing: 1 });
+
+        leftY += 30;
+        doc.fillColor(isDark ? '#D1D5DB' : '#4B5563')
+            .font(font)
+            .fontSize(10)
+            .text(resumeData.summary, leftColX, leftY, { width: leftColWidth, align: 'justify', lineGap: 3 });
+
+        leftY += doc.heightOfString(resumeData.summary, { width: leftColWidth, fontSize: 10, lineGap: 3 }) + 35;
+    }
+
+    // Experience
+    if (resumeData.experience && resumeData.experience.length > 0) {
+        doc.fillColor(primaryColor).rect(leftColX, leftY, 4, 18).fill();
+        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
+            .font(boldFont)
+            .fontSize(13)
+            .text('EXPERIENCE', leftColX + 15, leftY + 2, { characterSpacing: 1 });
+
+        leftY += 30;
+
+        resumeData.experience.forEach((exp) => {
+            if (leftY > pageHeight - 80) {
+                doc.addPage();
+                if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
+                leftY = 50;
+            }
+
+            // Role
+            doc.fillColor(isDark ? '#F9FAFB' : '#111827')
+                .font(boldFont)
+                .fontSize(11)
+                .text(exp.role, leftColX, leftY, { width: leftColWidth * 0.7 });
+
+            // Duration
+            doc.fillColor(isDark ? '#6B7280' : '#888888')
+                .font(font)
+                .fontSize(9)
+                .text(exp.duration, leftColX, leftY + 2, { align: 'right', width: leftColWidth });
+
+            leftY += Math.max(16, doc.heightOfString(exp.role, { fontSize: 11, width: leftColWidth * 0.7 })) + 2;
+
+            // Company
+            doc.fillColor(secondaryColor).font(boldFont).fontSize(10).text(exp.company, leftColX, leftY);
+            leftY += 15;
+
+            // Description
+            doc.fillColor(isDark ? '#9CA3AF' : '#444444').font(font).fontSize(10).text(exp.description, leftColX, leftY, {
+                width: leftColWidth,
+                lineGap: 2,
+                align: 'justify'
+            });
+            leftY += doc.heightOfString(exp.description, { width: leftColWidth, fontSize: 10, lineGap: 2 }) + 25;
         });
     }
 
