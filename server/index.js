@@ -40,28 +40,14 @@ app.get('/health', (req, res) => {
 });
 
 // Start Server
-const startServer = (port) => {
-    const currentPort = parseInt(port, 10);
-    const server = app.listen(currentPort, () => {
-        console.log(`Server is running on port ${currentPort}`);
-    });
+const server = app.listen(50003, '0.0.0.0', () => {
+    console.log(`Server is running on port 50003`);
+});
 
-    server.on('error', (error) => {
-        if (error.code === 'EADDRINUSE') {
-            console.log(`Port ${currentPort} is in use, trying ${currentPort + 1}...`);
-            startServer(currentPort + 1);
-        } else {
-            console.error('Server error:', error);
-        }
-    });
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
 
-    process.on('uncaughtException', (error) => {
-        console.error('Uncaught Exception:', error);
-    });
-
-    process.on('unhandledRejection', (reason, promise) => {
-        console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    });
-};
-
-startServer(PORT);
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
