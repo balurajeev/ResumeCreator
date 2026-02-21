@@ -128,73 +128,56 @@ const generatePDF = (resumeData, stream) => {
             doc.fillColor(isDark ? '#FFFFFF' : secondaryColor).font(boldFont).fontSize(13).text('EXPERIENCE', margin + 15, ly + 2);
             ly += 35;
 
-            const timelineX = margin + 2; // Center of the 4px vertical bar
-            const expStartX = margin + 25; // Indent content for timeline
-            const itemLeftWidth = leftWidth - 15;
-
-            // Pre-calculate heights for the connecting line
-            const experienceEntries = [];
-            let currentLy = ly;
+            const timelineX = margin + 2;
+            const expStartX = margin + 30; // Increased spacing for circles
+            const itemLeftWidth = leftWidth - 30; // Reduced width to avoid overlap
 
             resumeData.experience.forEach((exp, index) => {
-                if (currentLy > pageHeight - 120) {
-                    currentLy = 50;
-                }
-                const startY = currentLy;
+                const role = String(exp.role || '');
+                const duration = String(exp.duration || '');
+                const company = String(exp.company || '');
+                const description = String(exp.description || '');
 
-                // Estimate height
-                const roleHeight = Math.max(16, doc.heightOfString(String(exp.role || ''), { fontSize: 11, width: itemLeftWidth - 100 }));
-                const descHeight = doc.heightOfString(String(exp.description || ''), { width: itemLeftWidth, fontSize: 10, lineGap: 1.5 });
-                const totalHeight = 16 + 18 + descHeight + 28;
+                // Safety padding check for duration
+                const durTextSize = 8;
+                const durWidth = doc.widthOfString(duration, { fontSize: durTextSize }) + 10;
+                const roleWidthLimit = itemLeftWidth - durWidth - 10;
 
-                experienceEntries.push({ ...exp, y: startY, height: totalHeight });
-                currentLy += totalHeight;
-            });
+                // Pre-check height to avoid split blocks
+                const roleHeight = doc.heightOfString(role, { fontSize: 11, width: roleWidthLimit, font: boldFont });
+                const companyHeight = 18;
+                const descHeight = doc.heightOfString(description, { fontSize: 10, width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
+                const totalItemHeight = roleHeight + companyHeight + descHeight + 35;
 
-            // Draw Timeline Line
-            if (experienceEntries.length > 1) {
-                doc.strokeColor(timelineColor).lineWidth(1.5)
-                    .moveTo(timelineX, experienceEntries[0].y + 5)
-                    .lineTo(timelineX, experienceEntries[experienceEntries.length - 1].y + 5)
-                    .stroke();
-            }
-
-            resumeData.experience.forEach((exp, index) => {
-                if (ly > pageHeight - 120) {
+                if (ly + totalItemHeight > pageHeight - 50) {
                     doc.addPage();
                     if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
                     ly = 50;
-
-                    // Redraw line on new page if needed (simplified for repo version)
-                    doc.strokeColor(timelineColor).lineWidth(1.5)
-                        .moveTo(timelineX, ly)
-                        .lineTo(timelineX, pageHeight - 50)
-                        .stroke();
                 }
 
-                // Blue Circle Bullet
-                doc.fillColor(primaryColor).circle(timelineX, ly + 5, 4).fill();
+                // Vertical Line Segment (Continuous look)
+                doc.strokeColor(timelineColor).lineWidth(1).moveTo(timelineX, ly).lineTo(timelineX, ly + totalItemHeight).stroke();
 
-                // Role
-                const role = String(exp.role || '');
-                doc.fillColor(isDark ? '#FFFFFF' : '#111827').font(boldFont).fontSize(11).text(role, expStartX, ly, { width: itemLeftWidth - 100 });
+                // Blue Circle Bullet (Centered vertically with first line of role)
+                doc.fillColor(primaryColor).circle(timelineX, ly + 6, 4).fill();
 
-                // Duration Pill
-                const dur = String(exp.duration || '');
-                const durWidth = doc.widthOfString(dur, { fontSize: 8.5 }) + 10;
+                // Duration Pill (Right aligned relative to role)
                 doc.fillColor(isDark ? '#1F2937' : '#F3F4F6').rect(margin + leftWidth - durWidth, ly - 2, durWidth, 14, 7).fill();
-                doc.fillColor(grayColor).font(font).fontSize(8.5).text(dur, margin + leftWidth - durWidth + 5, ly + 1);
+                doc.fillColor(grayColor).font(font).fontSize(durTextSize).text(duration, margin + leftWidth - durWidth + 5, ly + 1.5);
 
-                ly += Math.max(16, doc.heightOfString(role, { fontSize: 11, width: itemLeftWidth - 100 })) + 4;
+                // Role Text (Using calculated roleWidthLimit to prevent overlap)
+                doc.fillColor(isDark ? '#FFFFFF' : '#111827').font(boldFont).fontSize(11).text(role, expStartX, ly, { width: roleWidthLimit });
+
+                ly += roleHeight + 4;
 
                 // Company
-                doc.fillColor(secondaryColor).font(boldFont).fontSize(10.5).text(String(exp.company || ''), expStartX, ly);
-                ly += 18;
+                doc.fillColor(secondaryColor).font(boldFont).fontSize(10.5).text(company, expStartX, ly);
+                ly += companyHeight;
 
                 // Description
-                const desc = String(exp.description || '');
-                doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(desc, expStartX, ly, { width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
-                ly += doc.heightOfString(desc, { width: itemLeftWidth, fontSize: 10, lineGap: 1.5 }) + 28;
+                doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(description, expStartX, ly, { width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
+
+                ly += descHeight + 30;
             });
         }
 

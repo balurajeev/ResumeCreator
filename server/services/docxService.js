@@ -128,30 +128,33 @@ const generateDOCX = async (resumeData) => {
                                                         new TextRun({ text: "●  ", color: primaryColor, size: 22 }),
                                                         new TextRun({ text: String(exp.role || 'Role'), bold: true, size: 20, color: textColor })
                                                     ],
-                                                    spacing: { before: 200 },
-                                                    border: { left: { color: timelineColor, space: 12, style: BorderStyle.SINGLE, size: 12 } },
+                                                    spacing: { before: 200, left: -240 }, // Negative indent to place bullet on the line
+                                                    border: { left: { color: timelineColor, space: 10, style: BorderStyle.SINGLE, size: 12 } },
+                                                    indent: { left: 240 },
                                                 }),
                                                 new Paragraph({
                                                     children: [
                                                         new TextRun({ text: String(exp.company || 'Company'), bold: true, color: secondaryColor, size: 18 }),
                                                         new TextRun({ text: `\t${String(exp.duration || '')}`, color: grayText, size: 16 }),
                                                     ],
-                                                    tabStops: [{ type: 'right', position: 6500 }],
-                                                    spacing: { after: 100, left: 240 },
-                                                    border: { left: { color: timelineColor, space: 12, style: BorderStyle.SINGLE, size: 12 } },
+                                                    tabStops: [{ type: 'right', position: 6000 }],
+                                                    spacing: { after: 100 },
+                                                    border: { left: { color: timelineColor, space: 10, style: BorderStyle.SINGLE, size: 12 } },
+                                                    indent: { left: 240 },
                                                 }),
                                                 ...(String(exp.description || '')).split('\n').filter(l => l.trim()).map(line => (
                                                     new Paragraph({
                                                         children: [new TextRun({ text: line.trim() })],
-                                                        spacing: { after: 80, left: 240 },
+                                                        spacing: { after: 80 },
                                                         alignment: AlignmentType.JUSTIFY,
-                                                        border: { left: { color: timelineColor, space: 12, style: BorderStyle.SINGLE, size: 12 } },
+                                                        border: { left: { color: timelineColor, space: 10, style: BorderStyle.SINGLE, size: 12 } },
+                                                        indent: { left: 240 },
                                                     })
                                                 )),
                                                 new Paragraph({
                                                     children: [new TextRun({ text: "" })],
                                                     spacing: { after: 200 },
-                                                    border: { left: (index < experience.length - 1) ? { color: timelineColor, space: 12, style: BorderStyle.SINGLE, size: 12 } : { style: BorderStyle.NONE } }
+                                                    border: { left: (index < experience.length - 1) ? { color: timelineColor, space: 10, style: BorderStyle.SINGLE, size: 12 } : { style: BorderStyle.NONE } }
                                                 }),
                                             ]),
                                         ],

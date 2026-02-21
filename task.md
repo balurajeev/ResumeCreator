@@ -22,10 +22,9 @@
     - [x] Enhance overall App UX with more colors and animations [x]
 - [x] Fix PDF export styling (Name, Header, Colors)
 - [x] Fix DOCX export (Include all sections, tables)
-- [x] Sync theme colors and fonts between UI and Export
-- [x] Resolve Experience Description data loss in Word
-- [x] Stabilize connection on Port 50003
+- [x] Resolve Role/Duration overlap in PDF
 - [x] Implement Vertical Timeline in exports
+- [x] Stabilize connection on Port 50003
 - [x] Provide final high-fidelity export services
 - [x] Sync Export Styles [x]
     - [x] Map Theme Colors to Hex codes in Backend [x]
