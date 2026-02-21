@@ -64,8 +64,8 @@ router.post('/rewrite', async (req, res) => {
 router.post('/export-pdf', async (req, res) => {
     try {
         const resumeData = req.body;
-        console.log('--- GENERATING PDF FOR:', resumeData.name, '---');
-        console.log('Sections present:', Object.keys(resumeData));
+        console.log('--- EXPORTING PDF FOR:', resumeData.name, '---');
+        console.log('FULL DATA:', JSON.stringify(resumeData, null, 2));
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=resume.pdf');
         generatePDF(resumeData, res);
@@ -78,7 +78,8 @@ router.post('/export-pdf', async (req, res) => {
 router.post('/export-docx', async (req, res) => {
     try {
         const resumeData = req.body;
-        console.log('--- GENERATING DOCX FOR:', resumeData.name, '---');
+        console.log('--- EXPORTING DOCX FOR:', resumeData.name, '---');
+        console.log('FULL DATA:', JSON.stringify(resumeData, null, 2));
         const buffer = await generateDOCX(resumeData);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         res.setHeader('Content-Disposition', 'attachment; filename=resume.docx');

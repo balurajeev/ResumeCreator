@@ -21,157 +21,114 @@ const generatePDF = (resumeData, stream) => {
     const pageHeight = 841.89;
     const margin = 50;
 
-    // Full page background for Dark Mode
+    // Background
     if (isDark) {
         doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
     }
 
-    // Top border accent
+    // Top Accent
     if (!isDark) {
         doc.rect(0, 0, pageWidth, 6).fill(primaryColor);
     }
 
     // --- HEADER ---
-    let currentY = 55;
+    let y = 60;
 
-    // Name
     doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
         .font(boldFont)
-        .fontSize(32)
-        .text((resumeData.name || 'Your Name').toUpperCase(), margin, currentY, {
-            align: 'center',
-            width: pageWidth - (margin * 2),
-            characterSpacing: 0.5
-        });
+        .fontSize(28)
+        .text((resumeData.name || 'Your Name').toUpperCase(), margin, y, { align: 'center', width: pageWidth - 100 });
 
-    currentY += 40;
+    y += 35;
 
-    // Contact Info
-    let contactInfo = `${resumeData.email || ''}   |   ${resumeData.phone || ''}`;
-    doc.fillColor(isDark ? '#9CA3AF' : '#666666')
-        .font(font)
-        .fontSize(10.5)
-        .text(contactInfo, margin, currentY, { align: 'center', width: pageWidth - (margin * 2) });
+    let contact = `${resumeData.email || ''}   |   ${resumeData.phone || ''}`;
+    doc.fillColor(isDark ? '#9CA3AF' : '#666666').font(font).fontSize(10).text(contact, margin, y, { align: 'center', width: pageWidth - 100 });
 
-    currentY += 16;
+    y += 15;
 
-    // LinkedIn
     if (resumeData.linkedin) {
-        doc.fillColor(isDark ? '#3B82F6' : '#0a66c2')
-            .font(boldFont)
-            .fontSize(10)
-            .text('Click here', margin, currentY, {
-                align: 'center',
-                width: pageWidth - (margin * 2),
-                link: resumeData.linkedin,
-                underline: true
-            });
+        doc.fillColor(isDark ? '#3B82F6' : '#0a66c2').font(boldFont).fontSize(10).text('LinkedIn', margin, y, {
+            align: 'center',
+            width: pageWidth - 100,
+            link: resumeData.linkedin,
+            underline: true
+        });
     }
 
-    currentY += 30;
+    y += 30;
 
-    doc.strokeColor(isDark ? '#1F2937' : '#EEEEEE')
-        .lineWidth(0.5)
-        .moveTo(margin, currentY)
-        .lineTo(pageWidth - margin, currentY)
-        .stroke();
+    doc.strokeColor(isDark ? '#1F2937' : '#EEEEEE').lineWidth(0.5).moveTo(margin, y).lineTo(pageWidth - margin, y).stroke();
 
-    currentY += 40;
-    const contentStartY = currentY;
+    y += 35;
+    const columnStartY = y;
 
-    // --- TWO COLUMN PARAMETERS ---
-    const leftColX = margin;
-    const leftColWidth = (pageWidth - margin * 2) * 0.65;
+    // Columns
+    const leftWidth = 310;
+    const rightWidth = 170;
+    const rightX = margin + leftWidth + 30;
 
-    const rightColX = leftColX + leftColWidth + 30;
-    const rightColWidth = (pageWidth - margin * 2) * 0.35 - 30;
-
-    // Helper for Section Headers
-    const renderHeader = (text, x, y, hasBar = false) => {
-        if (hasBar) {
-            doc.fillColor(primaryColor).rect(x, y, 4, 18).fill();
-            doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
-                .font(boldFont)
-                .fontSize(13)
-                .text(text.toUpperCase(), x + 15, y + 2, { characterSpacing: 1 });
-        } else {
-            doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
-                .font(boldFont)
-                .fontSize(13)
-                .text(text.toUpperCase(), x, y, { characterSpacing: 1 });
-        }
-        return y + 30;
-    };
-
-    // --- RENDER SIDEBAR (Right Column) ---
-    let rightY = contentStartY;
+    // --- SIDEBAR (RIGHT) ---
+    let ry = columnStartY;
 
     // Education
-    if (resumeData.education && resumeData.education.length > 0) {
-        rightY = renderHeader('EDUCATION', rightColX, rightY, false);
+    if (resumeData.education?.length > 0) {
+        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor).font(boldFont).fontSize(12).text('EDUCATION', rightX, ry);
+        ry += 25;
         resumeData.education.forEach(edu => {
-            doc.fillColor(isDark ? '#F9FAFB' : '#111827').font(boldFont).fontSize(10).text(edu.degree || '', rightColX, rightY, { width: rightColWidth });
-            rightY += doc.heightOfString(edu.degree || '', { fontSize: 10, width: rightColWidth }) + 4;
-
-            doc.fillColor(isDark ? '#9CA3AF' : '#666666').font(font).fontSize(9).text(edu.institution || '', rightColX, rightY, { width: rightColWidth });
-            rightY += doc.heightOfString(edu.institution || '', { fontSize: 9, width: rightColWidth }) + 4;
-
-            doc.fillColor(isDark ? '#4B5563' : '#9CA3AF').font(boldFont).fontSize(8).text(edu.year || '', rightColX, rightY);
-            rightY += 25;
+            doc.fillColor(isDark ? '#FFFFFF' : '#333333').font(boldFont).fontSize(9).text(edu.degree || '', rightX, ry, { width: rightWidth });
+            ry += doc.heightOfString(edu.degree || '', { fontSize: 9, width: rightWidth }) + 3;
+            doc.fillColor(grayText = isDark ? '#9CA3AF' : '#666666').font(font).fontSize(8.5).text(edu.institution || '', rightX, ry, { width: rightWidth });
+            ry += doc.heightOfString(edu.institution || '', { fontSize: 8.5, width: rightWidth }) + 3;
+            doc.fillColor(isDark ? '#6B7280' : '#888888').font(font).fontSize(8).text(edu.year || '', rightX, ry);
+            ry += 20;
         });
     }
 
-    // Expertise
-    if (resumeData.skills && resumeData.skills.length > 0) {
-        rightY += 10;
-        rightY = renderHeader('EXPERTISE', rightColX, rightY, false);
+    // Skills
+    if (resumeData.skills?.length > 0) {
+        ry += 15;
+        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor).font(boldFont).fontSize(12).text('EXPERTISE', rightX, ry);
+        ry += 25;
         resumeData.skills.forEach(skill => {
-            doc.fillColor(isDark ? '#1F2937' : '#F9FAFB').rect(rightColX, rightY, rightColWidth, 16).fill();
-            doc.fillColor(isDark ? '#D1D5DB' : '#4B5563').font(boldFont).fontSize(8).text((skill || '').toUpperCase(), rightColX + 5, rightY + 4, { width: rightColWidth - 10 });
-            rightY += 20;
+            doc.fillColor(isDark ? '#D1D5DB' : '#444444').font(font).fontSize(9).text(`• ${skill}`, rightX, ry);
+            ry += 15;
         });
     }
 
-    // --- RENDER MAIN CONTENT (Left Column) ---
-    let leftY = contentStartY;
+    // --- MAIN (LEFT) ---
+    let ly = columnStartY;
 
     // Summary
     if (resumeData.summary) {
-        leftY = renderHeader('PROFESSIONAL SUMMARY', leftColX, leftY, true);
-        doc.fillColor(isDark ? '#D1D5DB' : '#4B5563')
-            .font(font)
-            .fontSize(10)
-            .text(resumeData.summary, leftColX, leftY, { width: leftColWidth, align: 'justify', lineGap: 3 });
-        leftY += doc.heightOfString(resumeData.summary, { width: leftColWidth, fontSize: 10, lineGap: 3 }) + 40;
+        doc.fillColor(primaryColor).rect(margin, ly, 3, 15).fill();
+        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor).font(boldFont).fontSize(12).text('PROFESSIONAL SUMMARY', margin + 12, ly + 1);
+        ly += 25;
+        doc.fillColor(isDark ? '#D1D5DB' : '#444444').font(font).fontSize(10).text(resumeData.summary, margin, ly, { width: leftWidth, align: 'justify', lineGap: 2 });
+        ly += doc.heightOfString(resumeData.summary, { width: leftWidth, fontSize: 10, lineGap: 2 }) + 35;
     }
 
     // Experience
-    if (resumeData.experience && resumeData.experience.length > 0) {
-        leftY = renderHeader('EXPERIENCE', leftColX, leftY, true);
-        resumeData.experience.forEach((exp) => {
-            if (leftY > pageHeight - 100) {
+    if (resumeData.experience?.length > 0) {
+        doc.fillColor(primaryColor).rect(margin, ly, 3, 15).fill();
+        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor).font(boldFont).fontSize(12).text('EXPERIENCE', margin + 12, ly + 1);
+        ly += 25;
+
+        resumeData.experience.forEach(exp => {
+            if (ly > pageHeight - 100) {
                 doc.addPage();
                 if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
-                leftY = 50;
+                ly = 50;
             }
 
-            // Role & Duration
-            const role = exp.role || 'Role';
-            const duration = exp.duration || '';
+            // Role & Date
+            doc.fillColor(isDark ? '#FFFFFF' : '#111827').font(boldFont).fontSize(11).text(exp.role || '', margin, ly, { width: leftWidth - 100 });
+            doc.fillColor(isDark ? '#9CA3AF' : '#888888').font(font).fontSize(9).text(exp.duration || '', margin, ly + 1, { align: 'right', width: leftWidth });
 
-            doc.fillColor(isDark ? '#F9FAFB' : '#111827').font(boldFont).fontSize(11).text(role, leftColX, leftY, { width: leftColWidth * 0.7 });
-            doc.fillColor(isDark ? '#6B7280' : '#888888').font(font).fontSize(9).text(duration, leftColX, leftY + 2, { align: 'right', width: leftColWidth });
-
-            leftY += Math.max(16, doc.heightOfString(role, { fontSize: 11, width: leftColWidth * 0.7 })) + 2;
-
-            // Company
-            doc.fillColor(secondaryColor).font(boldFont).fontSize(10).text(exp.company || '', leftColX, leftY);
-            leftY += 15;
-
-            // Description
-            const desc = exp.description || '';
-            doc.fillColor(isDark ? '#9CA3AF' : '#444444').font(font).fontSize(10).text(desc, leftColX, leftY, { width: leftColWidth, lineGap: 2, align: 'justify' });
-            leftY += doc.heightOfString(desc, { width: leftColWidth, fontSize: 10, lineGap: 2 }) + 25;
+            ly += 16;
+            doc.fillColor(secondaryColor).font(boldFont).fontSize(10).text(exp.company || '', margin, ly);
+            ly += 15;
+            doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(9.5).text(exp.description || '', margin, ly, { width: leftWidth, align: 'justify' });
+            ly += doc.heightOfString(exp.description || '', { width: leftWidth, fontSize: 9.5 }) + 25;
         });
     }
 

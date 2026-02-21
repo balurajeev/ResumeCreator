@@ -10,7 +10,9 @@ const generateDOCX = async (resumeData) => {
     const primaryColor = getHex(theme.colors?.primary || 'bg-linkedin-blue').replace('#', '');
     const secondaryColor = getHex(theme.colors?.secondary || 'text-linkedin-blue').replace('#', '');
     const isDark = theme.darkMode;
-    const font = theme.font === 'serif' ? 'Playfair Display' : 'Inter';
+
+    // Switch to standard fonts for better compatibility
+    const font = theme.font === 'serif' ? 'Times New Roman' : 'Arial';
     const bgColor = isDark ? '111827' : 'FFFFFF';
     const textColor = isDark ? 'FFFFFF' : '333333';
     const grayText = isDark ? '9CA3AF' : '666666';
@@ -35,17 +37,17 @@ const generateDOCX = async (resumeData) => {
         sections: [{
             properties: {
                 page: {
-                    margin: { top: 567, bottom: 567, left: 567, right: 567 }, // 1cm
+                    margin: { top: 720, bottom: 720, left: 720, right: 720 }, // 0.5 inch margins
                 },
             },
             children: [
-                // Header
+                // Header (Single column for simplicity and to avoid issues)
                 new Paragraph({
                     children: [
                         new TextRun({
                             text: (resumeData.name || 'Resume').toUpperCase(),
                             bold: true,
-                            size: 40, // 20pt
+                            size: 44, // 22pt
                             color: secondaryColor,
                         }),
                     ],
@@ -63,8 +65,7 @@ const generateDOCX = async (resumeData) => {
                             new ExternalHyperlink({
                                 children: [
                                     new TextRun({
-                                        text: "LinkedIn Profile",
-                                        style: "Hyperlink",
+                                        text: "LinkedIn",
                                         color: isDark ? "3B83F6" : "0a66c2",
                                         underline: true,
                                         size: 18,
@@ -75,14 +76,13 @@ const generateDOCX = async (resumeData) => {
                         ] : []),
                     ],
                     alignment: AlignmentType.CENTER,
-                    spacing: { after: 600 },
+                    spacing: { after: 400 },
                 }),
 
-                // Two Column Table
+                // Two Column Layout
                 new Table({
                     width: { size: 100, type: WidthType.PERCENTAGE },
-                    columnWidths: [7000, 3000], // Explicit twips
-                    layout: TableLayoutType.FIXED,
+                    columnWidths: [6500, 3500], // Explicitly set column widths
                     borders: {
                         top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE },
                         left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE },
@@ -93,19 +93,19 @@ const generateDOCX = async (resumeData) => {
                             children: [
                                 // Left Column
                                 new TableCell({
-                                    width: { size: 7000, type: WidthType.DXA },
+                                    width: { size: 65, type: WidthType.PERCENTAGE },
                                     margins: { right: 200 },
                                     children: [
                                         // Summary
                                         ...(resumeData.summary ? [
                                             new Paragraph({
                                                 children: [new TextRun({ text: 'PROFESSIONAL SUMMARY', bold: true, color: secondaryColor, size: 22 })],
-                                                border: { left: { color: primaryColor, space: 10, style: BorderStyle.SINGLE, size: 30 } },
+                                                border: { left: { color: primaryColor, space: 10, style: BorderStyle.SINGLE, size: 24 } },
                                                 spacing: { before: 200, after: 150 },
                                             }),
                                             new Paragraph({
                                                 children: [new TextRun({ text: resumeData.summary })],
-                                                spacing: { after: 350 },
+                                                spacing: { after: 300 },
                                                 alignment: AlignmentType.JUSTIFY,
                                             }),
                                         ] : []),
@@ -113,7 +113,7 @@ const generateDOCX = async (resumeData) => {
                                         // Experience
                                         new Paragraph({
                                             children: [new TextRun({ text: 'EXPERIENCE', bold: true, color: secondaryColor, size: 22 })],
-                                            border: { left: { color: primaryColor, space: 10, style: BorderStyle.SINGLE, size: 30 } },
+                                            border: { left: { color: primaryColor, space: 10, style: BorderStyle.SINGLE, size: 24 } },
                                             spacing: { before: 300, after: 150 },
                                         }),
                                         ...experience.flatMap(exp => [
@@ -126,12 +126,12 @@ const generateDOCX = async (resumeData) => {
                                                     new TextRun({ text: exp.company || 'Company', bold: true, color: secondaryColor, size: 18 }),
                                                     new TextRun({ text: `\t${exp.duration || ''}`, color: grayText, size: 16 }),
                                                 ],
-                                                tabStops: [{ type: 'right', position: 6500 }],
+                                                tabStops: [{ type: 'right', position: 6000 }], // Adjusted for 65% width
                                                 spacing: { after: 100 },
                                             }),
                                             new Paragraph({
                                                 text: exp.description || '',
-                                                spacing: { after: 400 },
+                                                spacing: { after: 350 },
                                                 alignment: AlignmentType.JUSTIFY,
                                             }),
                                         ]),
@@ -139,7 +139,7 @@ const generateDOCX = async (resumeData) => {
                                 }),
                                 // Right Column
                                 new TableCell({
-                                    width: { size: 3000, type: WidthType.DXA },
+                                    width: { size: 35, type: WidthType.PERCENTAGE },
                                     margins: { left: 200 },
                                     children: [
                                         // Education
@@ -160,16 +160,15 @@ const generateDOCX = async (resumeData) => {
                                             }),
                                         ]),
 
-                                        // Expertise
+                                        // Skills
                                         new Paragraph({
                                             children: [new TextRun({ text: 'EXPERTISE', bold: true, color: secondaryColor, size: 22 })],
                                             spacing: { before: 400, after: 150 },
                                         }),
                                         ...skills.map(skill => (
                                             new Paragraph({
-                                                children: [new TextRun({ text: ` ${skill.toUpperCase()} `, size: 14, color: textColor, bold: true })],
-                                                shading: { type: ShadingType.CLEAR, fill: isDark ? '1F2937' : 'F3F4F6' },
-                                                spacing: { before: 60, after: 60 },
+                                                children: [new TextRun({ text: `• ${skill}`, size: 16 })],
+                                                spacing: { before: 40, after: 40 },
                                             })
                                         )),
                                     ],
