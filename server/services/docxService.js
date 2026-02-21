@@ -1,7 +1,7 @@
 const {
     Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
     WidthType, BorderStyle, AlignmentType, ShadingType, ExternalHyperlink,
-    TableLayoutType, VerticalAlign
+    TableLayoutType
 } = require('docx');
 const { getHex } = require('./themeHelper');
 
@@ -14,6 +14,9 @@ const generateDOCX = async (resumeData) => {
     const bgColor = isDark ? '111827' : 'FFFFFF';
     const textColor = isDark ? 'FFFFFF' : '333333';
     const grayText = isDark ? '9CA3AF' : '666666';
+
+    // A4 width in twips is 11906. 
+    // Left col (65%) ~ 7739. Right col (35%) ~ 4167.
 
     // Safely extract arrays
     const experience = Array.isArray(resumeData.experience) ? resumeData.experience : [];
@@ -34,6 +37,16 @@ const generateDOCX = async (resumeData) => {
             },
         },
         sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 720, // 0.5 inch
+                        bottom: 720,
+                        left: 720,
+                        right: 720,
+                    },
+                },
+            },
             children: [
                 // Header: Name
                 new Paragraph({
@@ -78,6 +91,7 @@ const generateDOCX = async (resumeData) => {
                 // Two Column Layout
                 new Table({
                     width: { size: 100, type: WidthType.PERCENTAGE },
+                    columnWidths: [6800, 3700], // Explicit twip widths
                     layout: TableLayoutType.FIXED,
                     borders: {
                         top: { style: BorderStyle.NONE },
@@ -90,10 +104,10 @@ const generateDOCX = async (resumeData) => {
                     rows: [
                         new TableRow({
                             children: [
-                                // Left Column (65%)
+                                // Left Column (Main)
                                 new TableCell({
-                                    width: { size: 65, type: WidthType.PERCENTAGE },
-                                    margins: { right: 300 },
+                                    width: { size: 6800, type: WidthType.DXA },
+                                    margins: { right: 200 },
                                     children: [
                                         // Summary
                                         ...(resumeData.summary ? [
@@ -125,7 +139,7 @@ const generateDOCX = async (resumeData) => {
                                                     new TextRun({ text: exp.company || 'Company', bold: true, color: secondaryColor, size: 18 }),
                                                     new TextRun({ text: `\t${exp.duration || ''}`, color: grayText, size: 16 }),
                                                 ],
-                                                tabStops: [{ type: 'right', position: 7500 }],
+                                                tabStops: [{ type: 'right', position: 6500 }],
                                                 spacing: { after: 100 },
                                             }),
                                             new Paragraph({
@@ -138,8 +152,8 @@ const generateDOCX = async (resumeData) => {
                                 }),
                                 // Right Column (35%)
                                 new TableCell({
-                                    width: { size: 35, type: WidthType.PERCENTAGE },
-                                    margins: { left: 300 },
+                                    width: { size: 3700, type: WidthType.DXA },
+                                    margins: { left: 200 },
                                     children: [
                                         // Education
                                         new Paragraph({

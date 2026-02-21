@@ -87,7 +87,7 @@ const generatePDF = (resumeData, stream) => {
     const rightColX = leftColX + leftColWidth + 35;
     const rightColWidth = (pageWidth - margin * 2) * 0.38 - 35;
 
-    // --- RENDER SIDEBAR (On Page 1) ---
+    // --- RENDER SIDEBAR ---
     const renderSidebar = (startY) => {
         let y = startY;
 
@@ -96,16 +96,18 @@ const generatePDF = (resumeData, stream) => {
             doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
                 .font(boldFont)
                 .fontSize(13)
-                .text('EDUCATION', rightColX, y, { characterSpacing: 1 });
+                .text('EDUCATION', rightColX, y, { width: rightColWidth, characterSpacing: 1 });
 
             y += 30;
 
             resumeData.education.forEach(edu => {
-                doc.fillColor(isDark ? '#F9FAFB' : '#111827').font(boldFont).fontSize(10).text(edu.degree || '', rightColX, y, { width: rightColWidth });
-                y += doc.heightOfString(edu.degree || '', { fontSize: 10, width: rightColWidth }) + 4;
+                const degree = edu.degree || 'Degree';
+                doc.fillColor(isDark ? '#F9FAFB' : '#111827').font(boldFont).fontSize(10).text(degree, rightColX, y, { width: rightColWidth });
+                y += doc.heightOfString(degree, { fontSize: 10, width: rightColWidth }) + 4;
 
-                doc.fillColor(isDark ? '#9CA3AF' : '#666666').font(font).fontSize(9).text(edu.institution || '', rightColX, y, { width: rightColWidth });
-                y += 12;
+                const institution = edu.institution || 'University';
+                doc.fillColor(isDark ? '#9CA3AF' : '#666666').font(font).fontSize(9).text(institution, rightColX, y, { width: rightColWidth });
+                y += doc.heightOfString(institution, { fontSize: 9, width: rightColWidth }) + 4;
 
                 doc.fillColor(isDark ? '#4B5563' : '#9CA3AF').font(boldFont).fontSize(8).text(edu.year || '', rightColX, y);
                 y += 25;
@@ -118,7 +120,7 @@ const generatePDF = (resumeData, stream) => {
             doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
                 .font(boldFont)
                 .fontSize(13)
-                .text('EXPERTISE', rightColX, y, { characterSpacing: 1 });
+                .text('EXPERTISE', rightColX, y, { width: rightColWidth, characterSpacing: 1 });
 
             y += 30;
 
@@ -163,27 +165,25 @@ const generatePDF = (resumeData, stream) => {
         leftY += 35;
 
         resumeData.experience.forEach((exp) => {
-            if (leftY > pageHeight - 80) {
+            if (leftY > pageHeight - 100) {
                 doc.addPage();
                 if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
                 leftY = 50;
-                // Note: We don't re-render sidebar on page 2 to match standard resume layouts 
-                // but we could if needed.
             }
 
             // Role
             doc.fillColor(isDark ? '#F9FAFB' : '#111827')
                 .font(boldFont)
                 .fontSize(11)
-                .text(exp.role || '', leftColX, leftY, { width: leftColWidth * 0.65 });
+                .text(exp.role || '', leftColX, leftY, { width: leftColWidth * 0.60 });
 
             // Duration
             doc.fillColor(isDark ? '#6B7280' : '#888888')
                 .font(font)
                 .fontSize(9)
-                .text(exp.duration || '', leftColX, leftY + 2, { align: 'right', width: leftColWidth });
+                .text(exp.duration || '', leftColX + leftColWidth * 0.60, leftY + 2, { align: 'right', width: leftColWidth * 0.40 });
 
-            leftY += Math.max(16, doc.heightOfString(exp.role || '', { fontSize: 11, width: leftColWidth * 0.65 })) + 2;
+            leftY += Math.max(16, doc.heightOfString(exp.role || '', { fontSize: 11, width: leftColWidth * 0.60 })) + 2;
 
             // Company
             doc.fillColor(secondaryColor).font(boldFont).fontSize(10).text(exp.company || '', leftColX, leftY);
