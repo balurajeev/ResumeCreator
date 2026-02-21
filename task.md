@@ -24,6 +24,7 @@
 - [x] Fix DOCX export (Include all sections, tables)
 - [x] Resolve Role/Duration overlap in PDF
 - [x] Implement Vertical Timeline in exports
+- [x] Expand Gemini Fallback List (Fixed 404/429 issues) [x]
 - [x] Stabilize connection on Port 50003
 - [x] Provide final high-fidelity export services
 - [x] Sync Export Styles [x]
