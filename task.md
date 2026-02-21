@@ -22,10 +22,10 @@
     - [x] Enhance overall App UX with more colors and animations [x]
 - [x] Fix PDF export styling (Name, Header, Colors)
 - [x] Fix DOCX export (Include all sections, tables)
-- [/] Synchronize theme colors and fonts between UI and Export
-- [x] Clean up stale server processes (PIDs 36508, 38784)
+- [x] Correct Port mismatch (50003 -> 50004)
+- [x] Resolve Experience Description data loss in Word
 - [/] Verify alignment on professional test resumes
-- [ ] Final polishing of DOCX table structures
+- [x] Clean up stale server processes
 - [x] Sync Export Styles [x]
     - [x] Map Theme Colors to Hex codes in Backend [x]
     - [x] Update PDF Service to support themes [x]
