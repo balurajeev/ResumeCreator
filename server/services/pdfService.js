@@ -22,6 +22,15 @@ const generatePDF = (resumeData, stream) => {
 
         doc.pipe(stream);
 
+        // When PDFKit auto-creates a new page (text overflow), ensure text starts with proper margin
+        doc.on('pageAdded', () => {
+            if (isDark) {
+                doc.rect(0, 0, doc.page.width, doc.page.height).fill('#111827');
+            }
+            doc.x = margin + 30; // align with expStartX
+            doc.y = 50;          // top margin
+        });
+
         const pageWidth = 595.28;
         const pageHeight = 841.89;
         const margin = 50;
