@@ -39,7 +39,7 @@ const generateDOCX = async (resumeData) => {
                     alignment: AlignmentType.CENTER,
                     spacing: { before: 200, after: 100 },
                 }),
-                // header: Contact details with link
+                // header: Contact details
                 new Paragraph({
                     children: [
                         new TextRun({
@@ -53,7 +53,7 @@ const generateDOCX = async (resumeData) => {
                                     new TextRun({
                                         text: "Click here",
                                         style: "Hyperlink",
-                                        color: "0a66c2",
+                                        color: isDark ? "3B82F6" : "0a66c2",
                                         underline: true,
                                         size: 19,
                                     }),
@@ -63,7 +63,7 @@ const generateDOCX = async (resumeData) => {
                         ] : []),
                     ],
                     alignment: AlignmentType.CENTER,
-                    spacing: { after: 600 },
+                    spacing: { after: 500 },
                 }),
 
                 // Two Column Layout via Table
@@ -80,43 +80,39 @@ const generateDOCX = async (resumeData) => {
                     rows: [
                         new TableRow({
                             children: [
-                                // Left Column (Main)
+                                // Left Column (65%)
                                 new TableCell({
                                     width: { size: 65, type: WidthType.PERCENTAGE },
-                                    margins: { right: 400 },
+                                    margins: { right: 300 },
                                     children: [
                                         // Summary
                                         ...(resumeData.summary ? [
                                             new Paragraph({
-                                                children: [
-                                                    new TextRun({ text: 'PROFESSIONAL SUMMARY', bold: true, color: secondaryColor, size: 25 }),
-                                                ],
-                                                border: { left: { color: primaryColor, space: 8, style: BorderStyle.SINGLE, size: 24 } },
+                                                children: [new TextRun({ text: 'PROFESSIONAL SUMMARY', bold: true, color: secondaryColor, size: 24 })],
+                                                border: { left: { color: primaryColor, space: 6, style: BorderStyle.SINGLE, size: 24 } },
                                                 spacing: { before: 200, after: 150 },
                                             }),
                                             new Paragraph({
-                                                children: [new TextRun({ text: `"${resumeData.summary}"`, italic: true, size: 21, color: grayText })],
-                                                spacing: { after: 400 },
+                                                children: [new TextRun({ text: resumeData.summary })],
+                                                spacing: { after: 350 },
                                                 alignment: AlignmentType.JUSTIFY,
                                             }),
                                         ] : []),
 
                                         // Experience
                                         new Paragraph({
-                                            children: [
-                                                new TextRun({ text: 'EXPERIENCE', bold: true, color: secondaryColor, size: 25 }),
-                                            ],
-                                            border: { left: { color: primaryColor, space: 8, style: BorderStyle.SINGLE, size: 24 } },
-                                            spacing: { before: 400, after: 150 },
+                                            children: [new TextRun({ text: 'EXPERIENCE', bold: true, color: secondaryColor, size: 24 })],
+                                            border: { left: { color: primaryColor, space: 6, style: BorderStyle.SINGLE, size: 24 } },
+                                            spacing: { before: 300, after: 150 },
                                         }),
                                         ...(resumeData.experience || []).flatMap(exp => [
                                             new Paragraph({
-                                                children: [new TextRun({ text: exp.role, bold: true, size: 23, color: textColor })],
-                                                spacing: { before: 200 },
+                                                children: [new TextRun({ text: exp.role, bold: true, size: 22, color: textColor })],
+                                                spacing: { before: 150 },
                                             }),
                                             new Paragraph({
                                                 children: [
-                                                    new TextRun({ text: exp.company, bold: true, color: secondaryColor, size: 19 }),
+                                                    new TextRun({ text: exp.company, bold: true, color: secondaryColor, size: 18 }),
                                                     new TextRun({ text: `\t${exp.duration}`, color: grayText, size: 16 }),
                                                 ],
                                                 tabStops: [{ type: 'right', position: 7500 }],
@@ -130,15 +126,15 @@ const generateDOCX = async (resumeData) => {
                                         ]),
                                     ],
                                 }),
-                                // Right Column (Sidebar)
+                                // Right Column (35%)
                                 new TableCell({
                                     width: { size: 35, type: WidthType.PERCENTAGE },
-                                    margins: { left: 400 },
+                                    margins: { left: 300 },
                                     children: [
                                         // Education
                                         new Paragraph({
-                                            children: [new TextRun({ text: 'EDUCATION', bold: true, color: secondaryColor, size: 23 })],
-                                            spacing: { before: 200, after: 200 },
+                                            children: [new TextRun({ text: 'EDUCATION', bold: true, color: secondaryColor, size: 24 })],
+                                            spacing: { before: 200, after: 150 },
                                         }),
                                         ...(resumeData.education || []).flatMap(edu => [
                                             new Paragraph({
@@ -147,23 +143,24 @@ const generateDOCX = async (resumeData) => {
                                             }),
                                             new Paragraph({
                                                 children: [new TextRun({ text: edu.institution, size: 17, color: grayText })],
+                                                spacing: { after: 50 },
                                             }),
                                             new Paragraph({
                                                 children: [new TextRun({ text: edu.year, size: 16, color: grayText, bold: true })],
-                                                spacing: { after: 300 },
+                                                spacing: { after: 200 },
                                             }),
                                         ]),
 
-                                        // Skills
+                                        // Skills / Expertise
                                         new Paragraph({
-                                            children: [new TextRun({ text: 'EXPERTISE', bold: true, color: secondaryColor, size: 23 })],
-                                            spacing: { before: 500, after: 200 },
+                                            children: [new TextRun({ text: 'EXPERTISE', bold: true, color: secondaryColor, size: 24 })],
+                                            spacing: { before: 400, after: 150 },
                                         }),
                                         ...(resumeData.skills || []).map(skill => (
                                             new Paragraph({
                                                 children: [
                                                     new TextRun({
-                                                        text: `  ${skill.toUpperCase()}  `,
+                                                        text: ` ${skill.toUpperCase()} `,
                                                         size: 15,
                                                         color: textColor,
                                                         bold: true
