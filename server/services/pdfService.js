@@ -87,69 +87,52 @@ const generatePDF = (resumeData, stream) => {
     const rightColX = leftColX + leftColWidth + 35;
     const rightColWidth = (pageWidth - margin * 2) * 0.38 - 35;
 
-    // --- RIGHT COLUMN (Sidebar) ---
-    // We write this FIRST to ensure it appears on the first page side-by-side with the Summary
-    let rightY = contentStartY;
+    // --- RENDER SIDEBAR (On Page 1) ---
+    const renderSidebar = (startY) => {
+        let y = startY;
 
-    // Education
-    if (resumeData.education && resumeData.education.length > 0) {
-        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
-            .font(boldFont)
-            .fontSize(13)
-            .text('EDUCATION', rightColX, rightY, { characterSpacing: 1 });
-
-        rightY += 30;
-
-        resumeData.education.forEach(edu => {
-            doc.fillColor(isDark ? '#F9FAFB' : '#111827')
+        // Education
+        if (resumeData.education && resumeData.education.length > 0) {
+            doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
                 .font(boldFont)
-                .fontSize(10)
-                .text(edu.degree, rightColX, rightY, { width: rightColWidth });
+                .fontSize(13)
+                .text('EDUCATION', rightColX, y, { characterSpacing: 1 });
 
-            rightY += doc.heightOfString(edu.degree, { fontSize: 10, width: rightColWidth }) + 4;
+            y += 30;
 
-            doc.fillColor(isDark ? '#9CA3AF' : '#666666')
-                .font(font)
-                .fontSize(9)
-                .text(edu.institution, rightColX, rightY, { width: rightColWidth });
+            resumeData.education.forEach(edu => {
+                doc.fillColor(isDark ? '#F9FAFB' : '#111827').font(boldFont).fontSize(10).text(edu.degree || '', rightColX, y, { width: rightColWidth });
+                y += doc.heightOfString(edu.degree || '', { fontSize: 10, width: rightColWidth }) + 4;
 
-            rightY += 12;
+                doc.fillColor(isDark ? '#9CA3AF' : '#666666').font(font).fontSize(9).text(edu.institution || '', rightColX, y, { width: rightColWidth });
+                y += 12;
 
-            doc.fillColor(isDark ? '#4B5563' : '#9CA3AF')
+                doc.fillColor(isDark ? '#4B5563' : '#9CA3AF').font(boldFont).fontSize(8).text(edu.year || '', rightColX, y);
+                y += 25;
+            });
+        }
+
+        // Expertise
+        if (resumeData.skills && resumeData.skills.length > 0) {
+            y += 10;
+            doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
                 .font(boldFont)
-                .fontSize(8)
-                .text(edu.year || '', rightColX, rightY);
+                .fontSize(13)
+                .text('EXPERTISE', rightColX, y, { characterSpacing: 1 });
 
-            rightY += 25;
-        });
-    }
+            y += 30;
 
-    // Skills
-    if (resumeData.skills && resumeData.skills.length > 0) {
-        rightY += 10;
-        doc.fillColor(isDark ? '#FFFFFF' : secondaryColor)
-            .font(boldFont)
-            .fontSize(13)
-            .text('EXPERTISE', rightColX, rightY, { characterSpacing: 1 });
+            resumeData.skills.forEach(skill => {
+                doc.fillColor(isDark ? '#1F2937' : '#F9FAFB').rect(rightColX, y, rightColWidth, 16).fill();
+                doc.fillColor(isDark ? '#D1D5DB' : '#4B5563').font(boldFont).fontSize(8).text((skill || '').toUpperCase(), rightColX + 5, y + 4, { width: rightColWidth - 10 });
+                y += 20;
+            });
+        }
+    };
 
-        rightY += 30;
+    renderSidebar(contentStartY);
 
-        resumeData.skills.forEach(skill => {
-            doc.fillColor(isDark ? '#1F2937' : '#F9FAFB')
-                .rect(rightColX, rightY, rightColWidth, 16)
-                .fill();
-
-            doc.fillColor(isDark ? '#D1D5DB' : '#4B5563')
-                .font(boldFont)
-                .fontSize(8)
-                .text(skill.toUpperCase(), rightColX + 5, rightY + 4, { width: rightColWidth - 10 });
-
-            rightY += 20;
-        });
-    }
-
-    // --- LEFT COLUMN (Main Content) ---
-    // Now write the main content. If it overflows to Page 2, the sidebar stays on Page 1.
+    // --- RENDER MAIN CONTENT ---
     let leftY = contentStartY;
 
     // Summary
@@ -166,7 +149,7 @@ const generatePDF = (resumeData, stream) => {
             .fontSize(10)
             .text(resumeData.summary, leftColX, leftY, { width: leftColWidth, align: 'justify', lineGap: 3 });
 
-        leftY += doc.heightOfString(resumeData.summary, { width: leftColWidth, fontSize: 10, lineGap: 3 }) + 35;
+        leftY += doc.heightOfString(resumeData.summary, { width: leftColWidth, fontSize: 10, lineGap: 3 }) + 40;
     }
 
     // Experience
@@ -177,40 +160,42 @@ const generatePDF = (resumeData, stream) => {
             .fontSize(13)
             .text('EXPERIENCE', leftColX + 15, leftY + 2, { characterSpacing: 1 });
 
-        leftY += 30;
+        leftY += 35;
 
         resumeData.experience.forEach((exp) => {
             if (leftY > pageHeight - 80) {
                 doc.addPage();
                 if (isDark) doc.rect(0, 0, pageWidth, pageHeight).fill('#111827');
                 leftY = 50;
+                // Note: We don't re-render sidebar on page 2 to match standard resume layouts 
+                // but we could if needed.
             }
 
             // Role
             doc.fillColor(isDark ? '#F9FAFB' : '#111827')
                 .font(boldFont)
                 .fontSize(11)
-                .text(exp.role, leftColX, leftY, { width: leftColWidth * 0.7 });
+                .text(exp.role || '', leftColX, leftY, { width: leftColWidth * 0.65 });
 
             // Duration
             doc.fillColor(isDark ? '#6B7280' : '#888888')
                 .font(font)
                 .fontSize(9)
-                .text(exp.duration, leftColX, leftY + 2, { align: 'right', width: leftColWidth });
+                .text(exp.duration || '', leftColX, leftY + 2, { align: 'right', width: leftColWidth });
 
-            leftY += Math.max(16, doc.heightOfString(exp.role, { fontSize: 11, width: leftColWidth * 0.7 })) + 2;
+            leftY += Math.max(16, doc.heightOfString(exp.role || '', { fontSize: 11, width: leftColWidth * 0.65 })) + 2;
 
             // Company
-            doc.fillColor(secondaryColor).font(boldFont).fontSize(10).text(exp.company, leftColX, leftY);
+            doc.fillColor(secondaryColor).font(boldFont).fontSize(10).text(exp.company || '', leftColX, leftY);
             leftY += 15;
 
             // Description
-            doc.fillColor(isDark ? '#9CA3AF' : '#444444').font(font).fontSize(10).text(exp.description, leftColX, leftY, {
+            doc.fillColor(isDark ? '#9CA3AF' : '#444444').font(font).fontSize(10).text(exp.description || '', leftColX, leftY, {
                 width: leftColWidth,
                 lineGap: 2,
                 align: 'justify'
             });
-            leftY += doc.heightOfString(exp.description, { width: leftColWidth, fontSize: 10, lineGap: 2 }) + 25;
+            leftY += doc.heightOfString(exp.description || '', { width: leftColWidth, fontSize: 10, lineGap: 2 }) + 25;
         });
     }
 
