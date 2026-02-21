@@ -128,7 +128,7 @@ const generateDOCX = async (resumeData) => {
                                                         new TextRun({ text: "●  ", color: primaryColor, size: 22 }),
                                                         new TextRun({ text: String(exp.role || 'Role'), bold: true, size: 20, color: textColor })
                                                     ],
-                                                    spacing: { before: 200, left: -240 }, // Negative indent to place bullet on the line
+                                                    spacing: { before: 100, left: -240 }, // Negative indent to place bullet on the line
                                                     border: { left: { color: timelineColor, space: 10, style: BorderStyle.SINGLE, size: 12 } },
                                                     indent: { left: 240 },
                                                 }),
@@ -153,7 +153,7 @@ const generateDOCX = async (resumeData) => {
                                                 )),
                                                 new Paragraph({
                                                     children: [new TextRun({ text: "" })],
-                                                    spacing: { after: 200 },
+                                                    spacing: { after: 100 },
                                                     border: { left: (index < experience.length - 1) ? { color: timelineColor, space: 10, style: BorderStyle.SINGLE, size: 12 } : { style: BorderStyle.NONE } }
                                                 }),
                                             ]),

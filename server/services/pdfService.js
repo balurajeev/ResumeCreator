@@ -147,7 +147,7 @@ const generatePDF = (resumeData, stream) => {
                 const roleHeight = doc.heightOfString(role, { fontSize: 11, width: roleWidthLimit, font: boldFont });
                 const companyHeight = 18;
                 const descHeight = doc.heightOfString(description, { fontSize: 10, width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
-                const totalItemHeight = roleHeight + companyHeight + descHeight + 35;
+                const totalItemHeight = roleHeight + companyHeight + descHeight + 20;
 
                 if (ly + totalItemHeight > pageHeight - 50) {
                     doc.addPage();
@@ -177,7 +177,7 @@ const generatePDF = (resumeData, stream) => {
                 // Description
                 doc.fillColor(isDark ? '#9CA3AF' : '#555555').font(font).fontSize(10).text(description, expStartX, ly, { width: itemLeftWidth, align: 'justify', lineGap: 1.5 });
 
-                ly += descHeight + 30;
+                ly += descHeight + 18;
             });
         }
 
