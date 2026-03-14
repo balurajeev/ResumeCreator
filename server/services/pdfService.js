@@ -113,8 +113,9 @@ const generatePDF = (resumeData, stream) => {
             doc.fillColor(isDark ? '#FFFFFF' : secondaryColor).font(boldFont).fontSize(13).text('EXPERTISE', rightX, ry);
             ry += 25;
             resumeData.skills.forEach(skill => {
-                doc.fillColor(isDark ? '#D1D5DB' : '#444444').font(font).fontSize(9.5).text(`• ${String(skill).toUpperCase()}`, rightX, ry);
-                ry += 16;
+                const skillText = `• ${String(skill).toUpperCase()}`;
+                doc.fillColor(isDark ? '#D1D5DB' : '#444444').font(font).fontSize(9.5).text(skillText, rightX, ry, { width: rightWidth });
+                ry += doc.heightOfString(skillText, { fontSize: 9.5, width: rightWidth }) + 4;
             });
         }
 

@@ -1,4 +1,4 @@
-const pdf = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 const fs = require('fs');
 
 const extractTextFromPDF = async (filePath) => {
@@ -10,13 +10,9 @@ const extractTextFromPDF = async (filePath) => {
 
         const dataBuffer = fs.readFileSync(filePath);
 
-        // Convert Buffer to Uint8Array as required by newer pdf-parse
+        // pdf-parse v2.x requires a Uint8Array (not a raw Buffer)
         const uint8Array = new Uint8Array(dataBuffer);
-
-        // Instantiate PDFParse class
-        const instance = new pdf.PDFParse(uint8Array);
-
-        // Extract text using getText() method
+        const instance = new PDFParse(uint8Array);
         const result = await instance.getText();
         return result.text;
     } catch (error) {
