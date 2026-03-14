@@ -193,7 +193,11 @@ const generateDOCX = async (resumeData) => {
                                             }),
                                             ...skills.map(skill => (
                                                 new Paragraph({
-                                                    children: [new TextRun({ text: `• ${String(skill).toUpperCase()}`, size: 15, bold: true })],
+                                                    children: [
+                                                        new TextRun({ text: "• ", size: 15, bold: true }),
+                                                        new TextRun({ text: String(skill).toUpperCase(), size: 15, bold: true })
+                                                    ],
+                                                    indent: { left: 180, hanging: 180 },
                                                     spacing: { before: 50, after: 50 },
                                                 })
                                             )),
