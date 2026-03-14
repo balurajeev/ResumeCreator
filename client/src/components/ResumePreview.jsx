@@ -52,6 +52,7 @@ const ResumePreview = ({ data, onExportPDF, onExportDOCX, theme }) => {
                         {data.email && <span className="flex items-center gap-1">{data.email}</span>}
                         {data.phone && <span className="flex items-center gap-1">| {data.phone}</span>}
                         {data.linkedin && <span className={`flex items-center gap-1 font-bold ${theme.colors.secondary}`}>| {data.linkedin}</span>}
+                        {data.maritalStatus && <span className="flex items-center gap-1">| {data.maritalStatus}</span>}
                     </div>
                 </div>
 

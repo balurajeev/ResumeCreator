@@ -50,6 +50,7 @@ const rewriteResume = async (resumeText) => {
                       "email": "Email Address",
                       "phone": "Phone Number",
                       "linkedin": "LinkedIn URL (if found)",
+                      "maritalStatus": "Marital Status (optional, e.g. Single, Married. Leave empty if not present)",
                       "summary": "A professional 2-3 sentence summary",
                       "experience": [
                         {

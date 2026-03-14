@@ -57,8 +57,11 @@ const generatePDF = (resumeData, stream) => {
 
         y += 35;
 
-        // Contact
+        // Contact & Marital Status
         let contact = `${String(resumeData.email || '')}   |   ${String(resumeData.phone || '')}`;
+        if (resumeData.maritalStatus) {
+            contact += `   |   ${String(resumeData.maritalStatus)}`;
+        }
         doc.fillColor(grayColor).font(font).fontSize(10).text(contact, margin, y, { align: 'center', width: pageWidth - 100 });
 
         y += 18;

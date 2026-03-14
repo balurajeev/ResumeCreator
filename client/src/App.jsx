@@ -17,7 +17,8 @@ function App() {
         summary: '',
         experience: [],
         education: [],
-        skills: []
+        skills: [],
+        maritalStatus: ''
     });
     const [loading, setLoading] = useState(false);
     const [mode, setMode] = useState('manual'); // 'manual' or 'upload'

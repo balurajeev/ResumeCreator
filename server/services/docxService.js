@@ -60,7 +60,7 @@ const generateDOCX = async (resumeData) => {
                     new Paragraph({
                         children: [
                             new TextRun({
-                                text: `${resumeData.email || ''}  |  ${resumeData.phone || ''}  |  `,
+                                text: `${resumeData.email || ''}  |  ${resumeData.phone || ''}  |  ${resumeData.maritalStatus ? resumeData.maritalStatus + '  |  ' : ''}`,
                                 color: grayText,
                                 size: 18,
                             }),

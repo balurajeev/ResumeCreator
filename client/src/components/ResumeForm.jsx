@@ -52,6 +52,7 @@ const ResumeForm = ({ data, setData }) => {
                     <input className="input-field" name="email" placeholder="Email" value={data.email} onChange={handleChange} />
                     <input className="input-field" name="phone" placeholder="Phone" value={data.phone} onChange={handleChange} />
                     <input className="input-field" name="linkedin" placeholder="LinkedIn URL" value={data.linkedin} onChange={handleChange} />
+                    <input className="input-field md:col-span-2" name="maritalStatus" placeholder="Marital Status (optional)" value={data.maritalStatus || ''} onChange={handleChange} />
                 </div>
             </div>
 
