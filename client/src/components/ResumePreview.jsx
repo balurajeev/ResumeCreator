@@ -43,94 +43,205 @@ const ResumePreview = ({ data, onExportPDF, onExportDOCX, theme }) => {
                 transition={{ duration: 0.3 }}
                 className={`card p-8 min-h-[842px] shadow-2xl transition-all duration-500 border-t-[6px] ${theme.colors.border} ${isDark ? 'bg-gray-900 text-gray-100 border-none' : 'bg-white text-gray-800'} ${fontClass}`}
             >
-                {/* Header Section */}
-                <div className={`text-center mb-8 pb-8 border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
-                    <h1 className={`text-4xl font-extrabold tracking-tight uppercase mb-2 ${isDark ? 'text-white' : theme.colors.secondary}`}>
-                        {data.name || 'Your Name'}
-                    </h1>
-                    <div className={`flex flex-wrap justify-center gap-4 text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {data.email && <span className="flex items-center gap-1">{data.email}</span>}
-                        {data.phone && <span className="flex items-center gap-1">| {data.phone}</span>}
-                        {data.linkedin && <span className={`flex items-center gap-1 font-bold ${theme.colors.secondary}`}>| {data.linkedin}</span>}
-                        {data.maritalStatus && <span className="flex items-center gap-1">| {data.maritalStatus}</span>}
-                    </div>
-                </div>
+                {/* Dynamic Layout Rendering */}
+                {theme.layout === 'two-column' && (
+                    <>
+                        <div className={`text-center mb-8 pb-8 border-b ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
+                            <h1 className={`text-4xl font-extrabold tracking-tight uppercase mb-2 ${isDark ? 'text-white' : theme.colors.secondary}`}>
+                                {data.name || 'Your Name'}
+                            </h1>
+                            <div className={`flex flex-wrap justify-center gap-4 text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {data.email && <span className="flex items-center gap-1">{data.email}</span>}
+                                {data.phone && <span className="flex items-center gap-1">| {data.phone}</span>}
+                                {data.linkedin && <span className={`flex items-center gap-1 font-bold ${theme.colors.secondary}`}>| {data.linkedin}</span>}
+                                {data.maritalStatus && <span className="flex items-center gap-1">| {data.maritalStatus}</span>}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-12 gap-8">
+                            <div className="col-span-12 lg:col-span-8 space-y-8">
+                                {/* Summary */}
+                                {data.summary && (
+                                    <section>
+                                        <h2 className={`text-sm font-black uppercase tracking-widest mb-3 flex items-center gap-2 ${theme.colors.secondary}`}>
+                                            <div className={`w-2 h-4 ${theme.colors.primary} rounded-full`}></div>
+                                            Professional Summary
+                                        </h2>
+                                        <p className={`leading-relaxed text-sm ${isDark ? 'text-gray-300' : 'text-gray-600 italic'}`}>"{data.summary}"</p>
+                                    </section>
+                                )}
+                                {/* Experience */}
+                                {data.experience?.length > 0 && (
+                                    <section>
+                                        <h2 className={`text-sm font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${theme.colors.secondary}`}>
+                                            <div className={`w-2 h-4 ${theme.colors.primary} rounded-full`}></div>
+                                            Experience
+                                        </h2>
+                                        <div className="space-y-6">
+                                            {data.experience.map((exp, i) => (
+                                                <div key={i} className="relative pl-6 border-l-2 border-gray-100 last:border-transparent">
+                                                    <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white ${theme.colors.primary}`}></div>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <h3 className={`font-bold text-base ${isDark ? 'text-white' : 'text-gray-800'}`}>{exp.role}</h3>
+                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold self-start ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>{exp.duration}</span>
+                                                    </div>
+                                                    <div className={`text-sm font-semibold mb-2 ${theme.colors.secondary}`}>{exp.company}</div>
+                                                    <p className={`text-sm leading-snug whitespace-pre-line ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{exp.description}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                            </div>
+                            <div className="col-span-12 lg:col-span-4 space-y-8">
+                                {/* Education */}
+                                {data.education?.length > 0 && (
+                                    <section>
+                                        <h2 className={`text-sm font-black uppercase tracking-widest mb-4 ${theme.colors.secondary}`}>Education</h2>
+                                        <div className="space-y-4">
+                                            {data.education.map((edu, i) => (
+                                                <div key={i}>
+                                                    <h3 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{edu.degree}</h3>
+                                                    <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{edu.institution}</div>
+                                                    <div className="text-[10px] font-bold text-gray-400 mt-1">{edu.year}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                                {/* Skills */}
+                                {data.skills?.length > 0 && (
+                                    <section>
+                                        <h2 className={`text-sm font-black uppercase tracking-widest mb-4 ${theme.colors.secondary}`}>Expertise</h2>
+                                        <div className="flex flex-wrap gap-2">
+                                            {data.skills.map((skill, i) => (
+                                                <span key={i} className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tighter ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-50 text-gray-600 border border-gray-100'}`}>{skill}</span>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
 
-                <div className="grid grid-cols-12 gap-8">
-                    {/* Left/Main Column */}
-                    <div className="col-span-12 lg:col-span-8 space-y-8">
-                        {/* Summary */}
+                {theme.layout === 'minimal' && (
+                    <div className="space-y-8">
+                        <div className="mb-6">
+                            <h1 className={`text-5xl font-light tracking-tight mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{data.name || 'Your Name'}</h1>
+                            <div className={`flex flex-wrap gap-4 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {data.email && <span>{data.email}</span>}
+                                {data.phone && <span>• {data.phone}</span>}
+                                {data.linkedin && <span className={theme.colors.secondary}>• {data.linkedin}</span>}
+                                {data.maritalStatus && <span>• {data.maritalStatus}</span>}
+                            </div>
+                        </div>
                         {data.summary && (
                             <section>
-                                <h2 className={`text-sm font-black uppercase tracking-widest mb-3 flex items-center gap-2 ${theme.colors.secondary}`}>
-                                    <div className={`w-2 h-4 ${theme.colors.primary} rounded-full`}></div>
-                                    Professional Summary
-                                </h2>
-                                <p className={`leading-relaxed text-sm ${isDark ? 'text-gray-300' : 'text-gray-600 italic'}`}>
-                                    "{data.summary}"
-                                </p>
+                                <p className={`leading-relaxed text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{data.summary}</p>
                             </section>
                         )}
-
-                        {/* Experience */}
                         {data.experience?.length > 0 && (
                             <section>
-                                <h2 className={`text-sm font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${theme.colors.secondary}`}>
-                                    <div className={`w-2 h-4 ${theme.colors.primary} rounded-full`}></div>
-                                    Experience
-                                </h2>
+                                <h2 className={`text-lg font-medium border-b pb-2 mb-4 ${theme.colors.secondary} ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>Experience</h2>
                                 <div className="space-y-6">
                                     {data.experience.map((exp, i) => (
-                                        <div key={i} className="relative pl-6 border-l-2 border-gray-100 last:border-transparent">
-                                            <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white ${theme.colors.primary}`}></div>
-                                            <div className="flex justify-between items-start mb-1">
-                                                <h3 className={`font-bold text-base ${isDark ? 'text-white' : 'text-gray-800'}`}>{exp.role}</h3>
-                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold self-start ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
-                                                    {exp.duration}
-                                                </span>
+                                        <div key={i} className="flex flex-col md:flex-row gap-4">
+                                            <div className={`md:w-1/4 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'} pt-1`}>{exp.duration}</div>
+                                            <div className="md:w-3/4">
+                                                <h3 className={`font-bold text-base ${isDark ? 'text-white' : 'text-gray-900'}`}>{exp.role}</h3>
+                                                <div className={`text-sm mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{exp.company}</div>
+                                                <p className={`text-sm leading-relaxed whitespace-pre-line ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{exp.description}</p>
                                             </div>
-                                            <div className={`text-sm font-semibold mb-2 ${theme.colors.secondary}`}>{exp.company}</div>
-                                            <p className={`text-sm leading-snug whitespace-pre-line ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{exp.description}</p>
                                         </div>
                                     ))}
                                 </div>
                             </section>
                         )}
-                    </div>
-
-                    {/* Right/Sidebar Column */}
-                    <div className="col-span-12 lg:col-span-4 space-y-8">
-                        {/* Education */}
                         {data.education?.length > 0 && (
                             <section>
-                                <h2 className={`text-sm font-black uppercase tracking-widest mb-4 ${theme.colors.secondary}`}>Education</h2>
+                                <h2 className={`text-lg font-medium border-b pb-2 mb-4 ${theme.colors.secondary} ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>Education</h2>
                                 <div className="space-y-4">
                                     {data.education.map((edu, i) => (
-                                        <div key={i}>
-                                            <h3 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{edu.degree}</h3>
-                                            <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{edu.institution}</div>
-                                            <div className="text-[10px] font-bold text-gray-400 mt-1">{edu.year}</div>
+                                        <div key={i} className="flex flex-col md:flex-row gap-4">
+                                            <div className={`md:w-1/4 text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'} pt-1`}>{edu.year}</div>
+                                            <div className="md:w-3/4">
+                                                <h3 className={`font-bold text-base ${isDark ? 'text-white' : 'text-gray-900'}`}>{edu.degree}</h3>
+                                                <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{edu.institution}</div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </section>
                         )}
-
-                        {/* Skills */}
                         {data.skills?.length > 0 && (
                             <section>
-                                <h2 className={`text-sm font-black uppercase tracking-widest mb-4 ${theme.colors.secondary}`}>Expertise</h2>
-                                <div className="flex flex-wrap gap-2">
-                                    {data.skills.map((skill, i) => (
-                                        <span key={i} className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tighter ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-50 text-gray-600 border border-gray-100'}`}>
-                                            {skill}
-                                        </span>
+                                <h2 className={`text-lg font-medium border-b pb-2 mb-4 ${theme.colors.secondary} ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>Skills</h2>
+                                <p className={`text-sm leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{data.skills.join(' • ')}</p>
+                            </section>
+                        )}
+                    </div>
+                )}
+
+                {theme.layout === 'classic' && (
+                    <div className="space-y-6">
+                        <div className={`text-center mb-6 pb-6 border-b-2 ${theme.colors.border}`}>
+                            <h1 className={`text-4xl font-bold uppercase tracking-widest mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>{data.name || 'Your Name'}</h1>
+                            <div className={`flex flex-wrap justify-center gap-3 text-sm font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {data.email && <span>{data.email}</span>}
+                                {data.phone && <span>| {data.phone}</span>}
+                                {data.linkedin && <span className={theme.colors.secondary}>| {data.linkedin}</span>}
+                                {data.maritalStatus && <span>| {data.maritalStatus}</span>}
+                            </div>
+                        </div>
+                        {data.summary && (
+                            <section className="mb-6">
+                                <h2 className={`text-center text-lg font-bold uppercase tracking-widest mb-3 ${theme.colors.secondary}`}>Professional Summary</h2>
+                                <p className={`text-justify text-sm leading-relaxed ${isDark ? 'text-gray-300' : 'text-gray-800'}`}>{data.summary}</p>
+                            </section>
+                        )}
+                        {data.experience?.length > 0 && (
+                            <section className="mb-6">
+                                <h2 className={`text-center text-lg font-bold uppercase tracking-widest mb-4 ${theme.colors.secondary}`}>Experience</h2>
+                                <div className="space-y-5">
+                                    {data.experience.map((exp, i) => (
+                                        <div key={i}>
+                                            <div className="flex justify-between items-baseline mb-1">
+                                                <h3 className={`font-bold text-base ${isDark ? 'text-white' : 'text-gray-900'}`}>{exp.role}</h3>
+                                                <span className={`text-sm font-semibold italic ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{exp.duration}</span>
+                                            </div>
+                                            <div className={`text-sm font-bold mb-2 ${theme.colors.secondary}`}>{exp.company}</div>
+                                            <p className={`text-sm leading-relaxed whitespace-pre-line pl-4 border-l ${isDark ? 'text-gray-400 border-gray-700' : 'text-gray-700 border-gray-300'}`}>{exp.description}</p>
+                                        </div>
                                     ))}
                                 </div>
                             </section>
                         )}
+                        {data.education?.length > 0 && (
+                            <section className="mb-6">
+                                <h2 className={`text-center text-lg font-bold uppercase tracking-widest mb-4 ${theme.colors.secondary}`}>Education</h2>
+                                <div className="space-y-4">
+                                    {data.education.map((edu, i) => (
+                                        <div key={i} className="flex justify-between items-baseline">
+                                            <div>
+                                                <h3 className={`font-bold text-base ${isDark ? 'text-white' : 'text-gray-900'}`}>{edu.degree}</h3>
+                                                <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{edu.institution}</div>
+                                            </div>
+                                            <span className={`text-sm font-semibold italic ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{edu.year}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                        {data.skills?.length > 0 && (
+                            <section>
+                                <h2 className={`text-center text-lg font-bold uppercase tracking-widest mb-4 ${theme.colors.secondary}`}>Core Competencies</h2>
+                                <div className={`text-center text-sm leading-relaxed font-semibold ${isDark ? 'text-gray-300' : 'text-gray-800'}`}>
+                                    {data.skills.join('  •  ')}
+                                </div>
+                            </section>
+                        )}
                     </div>
-                </div>
+                )}
             </motion.div>
         </div>
     );
